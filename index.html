@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>김엄마독서실 결제 계산기</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: var(--bg-gradient);
+            border-radius: 20px;
+            color: white;
+            box-shadow: var(--card-shadow);
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: var(--bg-gradient);
+            border-radius: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: var(--transition);
+            background: #f8fafc;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+
+        .checkbox-item:hover {
+            background: #e2e8f0;
+        }
+
+        .checkbox-item.active {
+            background: #dbeafe;
+            border-color: var(--primary);
+        }
+
+        .checkbox-item input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--bg-gradient);
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .result-section {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 2px dashed #e2e8f0;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+
+        .result-value {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 1.1rem;
+        }
+
+        .result-total {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 20px -25px -25px;
+            padding: 25px;
+            border-radius: 0 0 16px 16px;
+        }
+
+        .result-total .result-item {
+            border-bottom: none;
+            padding: 0;
+        }
+
+        .result-total .result-label {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+        }
+
+        .result-total .result-value {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .price-table {
+            margin-top: 20px;
+        }
+
+        .price-table-header {
+            display: grid;
+            grid-template-columns: 60px repeat(4, 1fr);
+            gap: 5px;
+            background: #f1f5f9;
+            padding: 12px 10px;
+            border-radius: 10px 10px 0 0;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+
+        .price-table-body {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .price-table-row {
+            display: grid;
+            grid-template-columns: 60px repeat(4, 1fr);
+            gap: 5px;
+            padding: 10px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .price-table-row:hover {
+            background: #f8fafc;
+        }
+
+        .price-table-row.selected {
+            background: #dbeafe;
+        }
+
+        .price-table-row > div {
+            text-align: center;
+        }
+
+        .price-table-row > div:first-child {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .tab-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            border: none;
+            background: #f1f5f9;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background: #e2e8f0;
+        }
+
+        .quick-calc {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .quick-btn {
+            padding: 15px 10px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .quick-btn:hover {
+            border-color: var(--primary);
+            background: #dbeafe;
+        }
+
+        .quick-btn .day {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .quick-btn .label {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .copy-btn {
+            padding: 8px 16px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+
+        .copy-btn:hover {
+            background: #059669;
+        }
+
+        .history-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .history-item .info {
+            font-size: 0.9rem;
+            color: #475569;
+            margin-bottom: 5px;
+        }
+
+        .history-item .amount {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .note-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-vacation {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .badge-regular {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .tooltip {
+            position: relative;
+        }
+
+        .info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            background: #e2e8f0;
+            border-radius: 50%;
+            font-size: 0.75rem;
+            color: #64748b;
+            cursor: help;
+            margin-left: 5px;
+        }
+
+        .section-divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+            margin: 20px 0;
+        }
+
+        /* 추가 금액 입력 섹션 스타일 */
+        .additional-section {
+            background: #fefce8;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #fef08a;
+        }
+
+        .additional-section h4 {
+            color: #a16207;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .additional-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .additional-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .additional-item label {
+            font-size: 0.85rem;
+            color: #713f12;
+            min-width: 60px;
+        }
+
+        .additional-item input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #fde047;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        /* 결제 방식 선택 */
+        .payment-method {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .payment-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .payment-btn.active {
+            border-color: var(--primary);
+            background: #dbeafe;
+            color: var(--primary);
+        }
+
+        .payment-btn:hover:not(.active) {
+            border-color: #cbd5e1;
+        }
+
+        /* 안내 메시지 */
+        .info-box {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .info-box p {
+            font-size: 0.85rem;
+            color: #0369a1;
+            line-height: 1.6;
+        }
+
+        /* 방학 기간 설정 */
+        .vacation-setting {
+            background: #fef3c7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .vacation-setting h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        /* 애니메이션 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* 반응형 */
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-calc {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .additional-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏫 김엄마관리형독서실</h1>
+            <p>결제 금액 자동 계산기 (12월 기준)</p>
+        </header>
+
+        <div class="main-grid">
+            <!-- 왼쪽: 계산 입력 -->
+            <div class="card">
+                <h2 class="card-title">결제 계산</h2>
+                
+                <div class="form-group">
+                    <label>좌석 유형 선택</label>
+                    <div class="tab-container">
+                        <button class="tab active" onclick="selectSeatType('자유석')">자유석</button>
+                        <button class="tab" onclick="selectSeatType('지정석')">지정석</button>
+                        <button class="tab" onclick="selectSeatType('칸막이')">칸막이</button>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>등원일 (결제 시작일)</label>
+                        <select id="startDay" onchange="calculate()">
+                            <option value="">선택하세요</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>결제 기간</label>
+                        <select id="period" onchange="calculate()">
+                            <option value="1">1개월</option>
+                            <option value="2">2개월</option>
+                            <option value="3">3개월</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" id="vacationTypeGroup" style="display:none;">
+                    <label>방학 요금 타입 (19일 이후 적용)</label>
+                    <div class="payment-method">
+                        <button class="payment-btn active" onclick="selectVacationType('A')" id="vacaA">A타입 (저렴)</button>
+                        <button class="payment-btn" onclick="selectVacationType('B')" id="vacaB">B타입 (일반)</button>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="form-group">
+                    <label>결제 방식</label>
+                    <div class="payment-method">
+                        <button class="payment-btn active" onclick="selectPayment('card')" id="payCard">💳 카드</button>
+                        <button class="payment-btn" onclick="selectPayment('cash')" id="payCash">💵 현금</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>할인 적용</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item" onclick="toggleCheckbox(this)">
+                            <input type="checkbox" id="discount10" onchange="calculate()">
+                            10% 할인
+                        </label>
+                        <label class="checkbox-item" onclick="toggleCheckbox(this)">
+                            <input type="checkbox" id="discount20" onchange="calculate()">
+                            20% 할인
+                        </label>
+                    </div>
+                </div>
+
+                <div class="additional-section">
+                    <h4>➕ 추가 금액</h4>
+                    <div class="additional-grid">
+                        <div class="additional-item">
+                            <label>멘토비</label>
+                            <input type="number" id="mentorFee" value="0" onchange="calculate()" placeholder="0">
+                        </div>
+                        <div class="additional-item">
+                            <label>사물함</label>
+                            <input type="number" id="lockerFee" value="0" onchange="calculate()" placeholder="0">
+                        </div>
+                        <div class="additional-item">
+                            <label>자리이동</label>
+                            <input type="number" id="moveFee" value="0" onchange="calculate()" placeholder="0">
+                        </div>
+                        <div class="additional-item">
+                            <label>기타</label>
+                            <input type="number" id="otherFee" value="0" onchange="calculate()" placeholder="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>환불 금액 (차감)</label>
+                    <input type="number" id="refundAmount" value="0" onchange="calculate()" placeholder="0">
+                </div>
+
+                <button class="btn btn-primary" onclick="calculate()">
+                    🧮 계산하기
+                </button>
+
+                <div class="result-section" id="resultSection" style="display:none;">
+                    <div class="result-item">
+                        <span class="result-label">기본 요금</span>
+                        <span class="result-value" id="basePrice">0원</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">할인 금액</span>
+                        <span class="result-value" id="discountAmount" style="color: #ef4444;">-0원</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">추가 금액</span>
+                        <span class="result-value" id="additionalAmount" style="color: #10b981;">+0원</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">환불 금액</span>
+                        <span class="result-value" id="refundDisplay" style="color: #ef4444;">-0원</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">청구 금액 (할인 후)</span>
+                        <span class="result-value" id="chargeAmount">0원</span>
+                    </div>
+                    <div class="result-total">
+                        <div class="result-item">
+                            <span class="result-label">💰 실 결제금액</span>
+                            <span class="result-value" id="finalAmount">0원</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <p>💡 <strong>카드 결제</strong> 시 약 1.1% 수수료가 적용됩니다.<br>
+                    📌 <strong>방학 기간</strong> (19일 이후)에는 A/B 타입 요금이 적용됩니다.</p>
+                </div>
+            </div>
+
+            <!-- 오른쪽: 요금표 -->
+            <div class="card">
+                <h2 class="card-title">12월 날짜별 요금표</h2>
+                
+                <div class="tab-container">
+                    <button class="tab active" onclick="showPriceTab('regular')" id="tabRegular">정규 요금</button>
+                    <button class="tab" onclick="showPriceTab('vacation')" id="tabVacation">방학 요금</button>
+                </div>
+
+                <div id="regularPriceTable" class="price-table">
+                    <div class="price-table-header">
+                        <div>일</div>
+                        <div>자유석</div>
+                        <div>지정석</div>
+                        <div>칸막이</div>
+                        <div></div>
+                    </div>
+                    <div class="price-table-body" id="priceTableBody">
+                        <!-- 동적 생성 -->
+                    </div>
+                </div>
+
+                <div id="vacationPriceTable" class="price-table" style="display:none;">
+                    <div class="price-table-header">
+                        <div>일</div>
+                        <div>자유A</div>
+                        <div>자유B</div>
+                        <div>지정석</div>
+                        <div>칸막이</div>
+                    </div>
+                    <div class="price-table-body" id="vacationTableBody">
+                        <!-- 동적 생성 -->
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <h3 style="font-size: 1rem; color: #475569; margin-bottom: 15px;">⚡ 빠른 계산 (등원일 선택)</h3>
+                <div class="quick-calc" id="quickCalc">
+                    <!-- 동적 생성 -->
+                </div>
+
+                <div class="section-divider"></div>
+
+                <h3 style="font-size: 1rem; color: #475569; margin-bottom: 15px;">📝 계산 기록</h3>
+                <div class="history-list" id="historyList">
+                    <p style="color: #94a3b8; font-size: 0.9rem; text-align: center; padding: 20px;">
+                        계산 기록이 없습니다
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 정규 요금표 (1~31일)
+        const regularPrices = {
+            1: {free: 390000, desk: 490000, cubicle: 555000},
+            2: {free: 377000, desk: 475600, cubicle: 536500},
+            3: {free: 364000, desk: 459200, cubicle: 518000},
+            4: {free: 351000, desk: 442800, cubicle: 499500},
+            5: {free: 338000, desk: 426400, cubicle: 481000},
+            6: {free: 325000, desk: 410000, cubicle: 462500},
+            7: {free: 312000, desk: 393600, cubicle: 444000},
+            8: {free: 299000, desk: 377200, cubicle: 425500},
+            9: {free: 286000, desk: 360800, cubicle: 407000},
+            10: {free: 273000, desk: 344400, cubicle: 388500},
+            11: {free: 260000, desk: 328000, cubicle: 370000},
+            12: {free: 247000, desk: 311600, cubicle: 351500},
+            13: {free: 234000, desk: 295200, cubicle: 333000},
+            14: {free: 221000, desk: 278800, cubicle: 314500},
+            15: {free: 221000, desk: 278800, cubicle: 314500},
+            16: {free: 208000, desk: 262400, cubicle: 296000},
+            17: {free: 195000, desk: 246000, cubicle: 277500},
+            18: {free: 182000, desk: 229600, cubicle: 259000},
+            19: {free: 169000, desk: 213200, cubicle: 240500},
+            20: {free: 156000, desk: 196800, cubicle: 222000},
+            21: {free: 143000, desk: 180400, cubicle: 203500},
+            22: {free: 130000, desk: 164000, cubicle: 185000},
+            23: {free: 117000, desk: 147600, cubicle: 166500},
+            24: {free: 104000, desk: 131200, cubicle: 148000},
+            25: {free: 91000, desk: 114800, cubicle: 129500},
+            26: {free: 78000, desk: 98400, cubicle: 111000},
+            27: {free: 65000, desk: 82000, cubicle: 92500},
+            28: {free: 52000, desk: 65600, cubicle: 74000},
+            29: {free: 39000, desk: 49200, cubicle: 55500},
+            30: {free: 26000, desk: 32800, cubicle: 37000},
+            31: {free: 13000, desk: 16400, cubicle: 18500}
+        };
+
+        // 방학 요금표 (19~31일)
+        const vacationPrices = {
+            19: {freeA: 214500, freeB: 230000, desk: 273000, cubicle: 299000},
+            20: {freeA: 198000, freeB: 212400, desk: 252000, cubicle: 276000},
+            21: {freeA: 181500, freeB: 194700, desk: 231000, cubicle: 253000},
+            22: {freeA: 165000, freeB: 177000, desk: 210000, cubicle: 230000},
+            23: {freeA: 148500, freeB: 159300, desk: 189000, cubicle: 207000},
+            24: {freeA: 132000, freeB: 141600, desk: 168000, cubicle: 184000},
+            25: {freeA: 115500, freeB: 123900, desk: 147000, cubicle: 161000},
+            26: {freeA: 99000, freeB: 106200, desk: 126000, cubicle: 138000},
+            27: {freeA: 82500, freeB: 88500, desk: 105000, cubicle: 115000},
+            28: {freeA: 66000, freeB: 70800, desk: 84000, cubicle: 92000},
+            29: {freeA: 49500, freeB: 53100, desk: 63000, cubicle: 69000},
+            30: {freeA: 33000, freeB: 35400, desk: 42000, cubicle: 46000},
+            31: {freeA: 16500, freeB: 17700, desk: 21000, cubicle: 23000}
+        };
+
+        // 상태 변수
+        let currentSeatType = '자유석';
+        let currentPayment = 'card';
+        let vacationType = 'A';
+        let calculationHistory = [];
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            initDaySelect();
+            renderPriceTable();
+            renderVacationTable();
+            renderQuickCalc();
+        });
+
+        // 등원일 선택 옵션 생성
+        function initDaySelect() {
+            const select = document.getElementById('startDay');
+            for (let i = 1; i <= 31; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `${i}일`;
+                if (i >= 19) {
+                    option.textContent += ' (방학요금)';
+                }
+                select.appendChild(option);
+            }
+        }
+
+        // 정규 요금표 렌더링
+        function renderPriceTable() {
+            const tbody = document.getElementById('priceTableBody');
+            tbody.innerHTML = '';
+            
+            for (let day = 1; day <= 31; day++) {
+                const prices = regularPrices[day];
+                const row = document.createElement('div');
+                row.className = 'price-table-row';
+                row.onclick = () => selectDay(day);
+                
+                const badge = day >= 19 ? '<span class="badge badge-vacation">방학</span>' : '';
+                
+                row.innerHTML = `
+                    <div>${day}일</div>
+                    <div>${formatNumber(prices.free)}</div>
+                    <div>${formatNumber(prices.desk)}</div>
+                    <div>${formatNumber(prices.cubicle)}</div>
+                    <div>${badge}</div>
+                `;
+                tbody.appendChild(row);
+            }
+        }
+
+        // 방학 요금표 렌더링
+        function renderVacationTable() {
+            const tbody = document.getElementById('vacationTableBody');
+            tbody.innerHTML = '';
+            
+            for (let day = 19; day <= 31; day++) {
+                const prices = vacationPrices[day];
+                const row = document.createElement('div');
+                row.className = 'price-table-row';
+                row.onclick = () => selectDay(day);
+                
+                row.innerHTML = `
+                    <div>${day}일</div>
+                    <div>${formatNumber(prices.freeA)}</div>
+                    <div>${formatNumber(prices.freeB)}</div>
+                    <div>${formatNumber(prices.desk)}</div>
+                    <div>${formatNumber(prices.cubicle)}</div>
+                `;
+                tbody.appendChild(row);
+            }
+        }
+
+        // 빠른 계산 버튼 렌더링
+        function renderQuickCalc() {
+            const container = document.getElementById('quickCalc');
+            const popularDays = [1, 5, 10, 15, 19, 20, 25, 30];
+            
+            container.innerHTML = popularDays.map(day => `
+                <div class="quick-btn" onclick="selectDay(${day})">
+                    <div class="day">${day}</div>
+                    <div class="label">${day >= 19 ? '방학' : '정규'}</div>
+                </div>
+            `).join('');
+        }
+
+        // 날짜 선택
+        function selectDay(day) {
+            document.getElementById('startDay').value = day;
+            
+            // 방학 타입 표시/숨김
+            const vacaGroup = document.getElementById('vacationTypeGroup');
+            if (day >= 19 && currentSeatType === '자유석') {
+                vacaGroup.style.display = 'block';
+            } else {
+                vacaGroup.style.display = 'none';
+            }
+            
+            calculate();
+        }
+
+        // 좌석 유형 선택
+        function selectSeatType(type) {
+            currentSeatType = type;
+            
+            document.querySelectorAll('.tab-container .tab').forEach((tab, index) => {
+                if (index < 3) {
+                    tab.classList.remove('active');
+                }
+            });
+            event.target.classList.add('active');
+            
+            // 방학 타입 표시 조건 확인
+            const day = parseInt(document.getElementById('startDay').value);
+            const vacaGroup = document.getElementById('vacationTypeGroup');
+            if (day >= 19 && type === '자유석') {
+                vacaGroup.style.display = 'block';
+            } else {
+                vacaGroup.style.display = 'none';
+            }
+            
+            calculate();
+        }
+
+        // 결제 방식 선택
+        function selectPayment(method) {
+            currentPayment = method;
+            
+            document.getElementById('payCard').classList.toggle('active', method === 'card');
+            document.getElementById('payCash').classList.toggle('active', method === 'cash');
+            
+            calculate();
+        }
+
+        // 방학 타입 선택
+        function selectVacationType(type) {
+            vacationType = type;
+            
+            document.getElementById('vacaA').classList.toggle('active', type === 'A');
+            document.getElementById('vacaB').classList.toggle('active', type === 'B');
+            
+            calculate();
+        }
+
+        // 요금표 탭 전환
+        function showPriceTab(tab) {
+            document.getElementById('tabRegular').classList.toggle('active', tab === 'regular');
+            document.getElementById('tabVacation').classList.toggle('active', tab === 'vacation');
+            document.getElementById('regularPriceTable').style.display = tab === 'regular' ? 'block' : 'none';
+            document.getElementById('vacationPriceTable').style.display = tab === 'vacation' ? 'block' : 'none';
+        }
+
+        // 체크박스 토글
+        function toggleCheckbox(element) {
+            element.classList.toggle('active');
+        }
+
+        // 기본 요금 계산
+        function getBasePrice(day, seatType) {
+            if (day >= 19 && seatType === '자유석') {
+                const prices = vacationPrices[day];
+                return vacationType === 'A' ? prices.freeA : prices.freeB;
+            }
+            
+            const prices = regularPrices[day];
+            switch(seatType) {
+                case '자유석': return prices.free;
+                case '지정석': return prices.desk;
+                case '칸막이': return prices.cubicle;
+                default: return 0;
+            }
+        }
+
+        // 메인 계산 함수
+        function calculate() {
+            const day = parseInt(document.getElementById('startDay').value);
+            if (!day) {
+                document.getElementById('resultSection').style.display = 'none';
+                return;
+            }
+
+            const period = parseInt(document.getElementById('period').value);
+            
+            // 기본 요금 계산
+            let basePrice = getBasePrice(day, currentSeatType);
+            
+            // 다음 달 요금 추가 (2개월 이상)
+            if (period >= 2) {
+                // 다음 달은 1일 기준 전체 요금
+                const nextMonthPrice = getFullMonthPrice(currentSeatType);
+                basePrice += nextMonthPrice * (period - 1);
+            }
+
+            // 할인 계산
+            let discountRate = 0;
+            if (document.getElementById('discount10').checked) discountRate = 0.1;
+            if (document.getElementById('discount20').checked) discountRate = 0.2;
+            const discountAmount = Math.round(basePrice * discountRate);
+            
+            // 추가 금액
+            const mentorFee = parseInt(document.getElementById('mentorFee').value) || 0;
+            const lockerFee = parseInt(document.getElementById('lockerFee').value) || 0;
+            const moveFee = parseInt(document.getElementById('moveFee').value) || 0;
+            const otherFee = parseInt(document.getElementById('otherFee').value) || 0;
+            const additionalAmount = mentorFee + lockerFee + moveFee + otherFee;
+            
+            // 환불 금액
+            const refundAmount = parseInt(document.getElementById('refundAmount').value) || 0;
+            
+            // 청구 금액 (할인 후 + 추가 - 환불)
+            const chargeAmount = basePrice - discountAmount + additionalAmount - refundAmount;
+            
+            // 실 결제금액 (카드 수수료 적용)
+            let finalAmount = chargeAmount;
+            if (currentPayment === 'card') {
+                // 카드 수수료 약 1.1% 적용
+                finalAmount = Math.round(chargeAmount * 0.989);
+            }
+
+            // 결과 표시
+            document.getElementById('resultSection').style.display = 'block';
+            document.getElementById('resultSection').classList.add('fade-in');
+            
+            document.getElementById('basePrice').textContent = formatCurrency(basePrice);
+            document.getElementById('discountAmount').textContent = `-${formatCurrency(discountAmount)}`;
+            document.getElementById('additionalAmount').textContent = `+${formatCurrency(additionalAmount)}`;
+            document.getElementById('refundDisplay').textContent = `-${formatCurrency(refundAmount)}`;
+            document.getElementById('chargeAmount').textContent = formatCurrency(chargeAmount);
+            document.getElementById('finalAmount').textContent = formatCurrency(finalAmount);
+
+            // 기록 추가
+            addToHistory({
+                seatType: currentSeatType,
+                day: day,
+                period: period,
+                basePrice: basePrice,
+                finalAmount: finalAmount,
+                payment: currentPayment
+            });
+        }
+
+        // 한달 전체 요금
+        function getFullMonthPrice(seatType) {
+            switch(seatType) {
+                case '자유석': return 390000;
+                case '지정석': return 490000;
+                case '칸막이': return 555000;
+                default: return 0;
+            }
+        }
+
+        // 기록 추가
+        function addToHistory(data) {
+            calculationHistory.unshift(data);
+            if (calculationHistory.length > 5) calculationHistory.pop();
+            renderHistory();
+        }
+
+        // 기록 렌더링
+        function renderHistory() {
+            const container = document.getElementById('historyList');
+            if (calculationHistory.length === 0) {
+                container.innerHTML = '<p style="color: #94a3b8; font-size: 0.9rem; text-align: center; padding: 20px;">계산 기록이 없습니다</p>';
+                return;
+            }
+
+            container.innerHTML = calculationHistory.map((item, index) => `
+                <div class="history-item fade-in">
+                    <div class="info">
+                        ${item.seatType} | ${item.day}일 | ${item.period}개월 | ${item.payment === 'card' ? '카드' : '현금'}
+                    </div>
+                    <div class="amount">${formatCurrency(item.finalAmount)}</div>
+                    <button class="copy-btn" onclick="copyAmount(${item.finalAmount})" style="margin-top: 8px;">
+                        📋 금액 복사
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // 금액 복사
+        function copyAmount(amount) {
+            navigator.clipboard.writeText(amount.toString()).then(() => {
+                alert('금액이 복사되었습니다: ' + formatCurrency(amount));
+            });
+        }
+
+        // 숫자 포맷팅
+        function formatNumber(num) {
+            return new Intl.NumberFormat('ko-KR').format(num);
+        }
+
+        function formatCurrency(num) {
+            return new Intl.NumberFormat('ko-KR').format(num) + '원';
+        }
+    </script>
+</body>
+</html>
