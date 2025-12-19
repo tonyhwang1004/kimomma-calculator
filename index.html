@@ -922,8 +922,7 @@
         }
 
         .seat-chart-bar.자유석 { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
-        .seat-chart-bar.지정석_여 { background: linear-gradient(90deg, #ec4899, #db2777); }
-        .seat-chart-bar.지정석_남 { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+        .seat-chart-bar.오픈형 { background: linear-gradient(90deg, #3b82f6, #2563eb); }
         .seat-chart-bar.칸막이 { background: linear-gradient(90deg, #10b981, #059669); }
         .seat-chart-bar.프리미엄 { background: linear-gradient(90deg, #f59e0b, #d97706); }
 
@@ -2381,10 +2380,24 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
         function renderSeatChart(floor, containerId) {
             const container = document.getElementById(containerId);
             const types = seatTypes[floor].filter(t => t !== '전체');
-            const max = Math.max(...types.map(t => students[floor].filter(s => s.seatType === t).length), 1);
+            
+            // 좌석 유형별 카운트 (매핑 적용)
+            const counts = {};
+            types.forEach(type => counts[type] = 0);
+            
+            students[floor].forEach(s => {
+                const normalizedType = normalizeSeatType(s.seatType);
+                if (counts.hasOwnProperty(normalizedType)) {
+                    counts[normalizedType]++;
+                } else if (types.includes(s.seatType)) {
+                    counts[s.seatType]++;
+                }
+            });
+            
+            const max = Math.max(...Object.values(counts), 1);
             
             container.innerHTML = types.map(type => {
-                const count = students[floor].filter(s => s.seatType === type).length;
+                const count = counts[type] || 0;
                 return `
                     <div class="seat-chart-row">
                         <span class="seat-chart-label">${type}</span>
