@@ -3,15 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>김엄마독서실 결제 검증 시스템</title>
+    <title>김엄마독서실 결제 계산기 v2</title>
     <meta name="theme-color" content="#2563eb">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="김엄마독서실">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #2563eb;
             --primary-dark: #1d4ed8;
             --primary-light: #dbeafe;
+            --secondary: #f97316;
+            --secondary-light: #ffedd5;
             --success: #10b981;
             --success-light: #d1fae5;
             --danger: #ef4444;
@@ -29,16 +33,20 @@
             --gray-800: #1f2937;
             --gray-900: #111827;
             --floor-7: #8b5cf6;
+            --floor-7-light: #ede9fe;
             --floor-8: #0891b2;
-            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --floor-8-light: #cffafe;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
             --radius: 12px;
             --radius-lg: 16px;
         }
 
         [data-theme="dark"] {
             --primary: #3b82f6;
+            --primary-dark: #2563eb;
             --primary-light: #1e3a5f;
             --gray-50: #111827;
             --gray-100: #1f2937;
@@ -55,11 +63,12 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Noto Sans KR', -apple-system, sans-serif;
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
             background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%);
             min-height: 100vh;
             color: var(--gray-800);
             line-height: 1.6;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         [data-theme="dark"] body {
@@ -67,7 +76,7 @@
         }
 
         .container {
-            max-width: 500px;
+            max-width: 480px;
             margin: 0 auto;
             padding: 16px;
             padding-bottom: 100px;
@@ -87,11 +96,13 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            margin-bottom: 4px;
         }
 
         .header .version {
             font-size: 0.875rem;
             color: var(--gray-500);
+            font-weight: 500;
         }
 
         .header-actions {
@@ -99,6 +110,8 @@
             right: 0;
             top: 50%;
             transform: translateY(-50%);
+            display: flex;
+            gap: 8px;
         }
 
         .icon-btn {
@@ -113,9 +126,17 @@
             justify-content: center;
             color: var(--gray-600);
             box-shadow: var(--shadow);
+            transition: all 0.2s ease;
         }
 
-        [data-theme="dark"] .icon-btn { background: var(--gray-100); }
+        .icon-btn:hover {
+            background: var(--gray-100);
+            transform: scale(1.05);
+        }
+
+        [data-theme="dark"] .icon-btn {
+            background: var(--gray-100);
+        }
 
         .nav-tabs {
             display: flex;
@@ -137,6 +158,7 @@
             font-size: 0.875rem;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.2s ease;
             background: transparent;
             color: var(--gray-500);
         }
@@ -146,6 +168,8 @@
             color: white;
             box-shadow: var(--shadow-md);
         }
+
+        .nav-tab:not(.active):hover { background: var(--gray-100); }
 
         .section { display: none; }
         .section.active { display: block; }
@@ -164,12 +188,13 @@
 
         .floor-tab {
             flex: 1;
-            padding: 14px;
+            padding: 14px 16px;
             border: none;
             border-radius: var(--radius);
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -178,8 +203,17 @@
             color: var(--gray-600);
         }
 
-        .floor-tab.floor-8.active { background: var(--floor-8); color: white; }
-        .floor-tab.floor-7.active { background: var(--floor-7); color: white; }
+        .floor-tab.floor-8.active {
+            background: var(--floor-8);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .floor-tab.floor-7.active {
+            background: var(--floor-7);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
 
         .floor-tab .count {
             background: rgba(255,255,255,0.3);
@@ -217,6 +251,7 @@
             gap: 8px;
         }
 
+        .card-header .icon { width: 20px; height: 20px; }
         .card-body { padding: 16px 20px; }
 
         .seat-filter {
@@ -234,10 +269,19 @@
             font-size: 0.875rem;
             font-weight: 500;
             cursor: pointer;
+            transition: all 0.2s ease;
             color: var(--gray-600);
         }
 
-        [data-theme="dark"] .seat-filter-btn { background: var(--gray-200); }
+        [data-theme="dark"] .seat-filter-btn {
+            background: var(--gray-200);
+            border-color: var(--gray-300);
+        }
+
+        .seat-filter-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
 
         .seat-filter-btn.active {
             background: var(--primary);
@@ -257,11 +301,15 @@
             border-radius: var(--radius);
             font-size: 0.9375rem;
             outline: none;
+            transition: all 0.2s ease;
             background: white;
             color: var(--gray-800);
         }
 
-        [data-theme="dark"] .search-box input { background: var(--gray-200); }
+        [data-theme="dark"] .search-box input {
+            background: var(--gray-200);
+            border-color: var(--gray-300);
+        }
 
         .search-box input:focus {
             border-color: var(--primary);
@@ -279,7 +327,7 @@
         }
 
         .student-list {
-            max-height: 280px;
+            max-height: 300px;
             overflow-y: auto;
             border: 1px solid var(--gray-200);
             border-radius: var(--radius);
@@ -289,6 +337,7 @@
             padding: 12px 16px;
             border-bottom: 1px solid var(--gray-100);
             cursor: pointer;
+            transition: all 0.15s ease;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -298,18 +347,56 @@
         .student-item:hover { background: var(--gray-50); }
         .student-item.selected { background: var(--primary-light); }
 
-        .student-info { display: flex; flex-direction: column; gap: 2px; }
-        .student-name { font-weight: 600; font-size: 0.9375rem; color: var(--gray-800); }
-        .student-detail { font-size: 0.8125rem; color: var(--gray-500); }
+        .student-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .student-name {
+            font-weight: 600;
+            font-size: 0.9375rem;
+            color: var(--gray-800);
+        }
+
+        .student-detail {
+            font-size: 0.8125rem;
+            color: var(--gray-500);
+        }
+
+        .student-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .student-action-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: var(--gray-100);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-500);
+            transition: all 0.2s ease;
+        }
+
+        .student-action-btn:hover { background: var(--gray-200); }
+        .student-action-btn.edit:hover { background: var(--primary-light); color: var(--primary); }
+        .student-action-btn.delete:hover { background: var(--danger-light); color: var(--danger); }
 
         .seat-badge {
             padding: 4px 10px;
             border-radius: 20px;
             font-size: 0.75rem;
             font-weight: 600;
+            margin-right: 8px;
         }
 
         .seat-badge.자유석 { background: #fef3c7; color: #92400e; }
+        .seat-badge.지정석 { background: #dbeafe; color: #1e40af; }
         .seat-badge.지정석_여 { background: #fce7f3; color: #9d174d; }
         .seat-badge.지정석_남 { background: #dbeafe; color: #1e40af; }
         .seat-badge.칸막이 { background: #d1fae5; color: #065f46; }
@@ -342,49 +429,6 @@
             color: var(--gray-600);
         }
 
-        .form-group { margin-bottom: 16px; }
-
-        .form-group label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--gray-700);
-            margin-bottom: 6px;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1px solid var(--gray-200);
-            border-radius: var(--radius);
-            font-size: 0.9375rem;
-            outline: none;
-            background: white;
-            color: var(--gray-800);
-        }
-
-        [data-theme="dark"] .form-group input,
-        [data-theme="dark"] .form-group select { background: var(--gray-200); }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-light);
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .form-row-3 {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 12px;
-        }
-
         .period-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -399,11 +443,20 @@
             font-size: 0.875rem;
             font-weight: 500;
             cursor: pointer;
+            transition: all 0.2s ease;
             text-align: center;
             color: var(--gray-700);
         }
 
-        [data-theme="dark"] .period-btn { background: var(--gray-200); }
+        [data-theme="dark"] .period-btn {
+            background: var(--gray-200);
+            border-color: var(--gray-300);
+        }
+
+        .period-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
 
         .period-btn.selected {
             background: var(--primary);
@@ -420,7 +473,7 @@
 
         .period-btn.selected .weeks { color: rgba(255,255,255,0.8); }
 
-        /* 옵션 체크박스 스타일 */
+        /* 옵션 섹션 스타일 */
         .options-section {
             background: var(--gray-50);
             border-radius: var(--radius);
@@ -455,9 +508,7 @@
 
         [data-theme="dark"] .option-item { background: var(--gray-100); }
 
-        .option-item:hover {
-            border-color: var(--primary);
-        }
+        .option-item:hover { border-color: var(--primary); }
 
         .option-item.active {
             border-color: var(--primary);
@@ -483,11 +534,43 @@
             color: var(--primary);
         }
 
+        .discount-btn-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .discount-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            background: white;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+            color: var(--gray-600);
+            transition: all 0.2s;
+        }
+
+        [data-theme="dark"] .discount-btn { background: var(--gray-100); }
+
+        .discount-btn:hover {
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .discount-btn.active {
+            background: var(--warning);
+            border-color: var(--warning);
+            color: white;
+        }
+
         .option-input-group {
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-top: 8px;
             padding: 10px 12px;
             background: white;
             border-radius: 8px;
@@ -510,182 +593,222 @@
             font-size: 0.875rem;
             outline: none;
             background: var(--gray-50);
+            max-width: 120px;
         }
 
-        .option-input-group input:focus {
-            border-color: var(--primary);
-        }
+        .option-input-group input:focus { border-color: var(--primary); }
 
-        /* 할인 버튼 그룹 */
-        .discount-btn-group {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .discount-btn {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid var(--gray-200);
-            border-radius: 8px;
-            background: white;
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            text-align: center;
-            color: var(--gray-600);
-            transition: all 0.2s;
-        }
-
-        [data-theme="dark"] .discount-btn { background: var(--gray-100); }
-
-        .discount-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .discount-btn.active {
-            background: var(--warning);
-            border-color: var(--warning);
-            color: white;
-        }
-
-        /* 검증 결과 박스 */
-        .verify-result {
+        .price-display {
+            background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-900) 100%);
             border-radius: var(--radius-lg);
-            padding: 20px;
-            margin-bottom: 16px;
+            padding: 24px;
             text-align: center;
+            color: white;
+            margin-bottom: 16px;
         }
 
-        .verify-result.match {
-            background: linear-gradient(135deg, var(--success-light) 0%, #ecfdf5 100%);
-            border: 2px solid var(--success);
-        }
-
-        .verify-result.mismatch {
-            background: linear-gradient(135deg, var(--danger-light) 0%, #fef2f2 100%);
-            border: 2px solid var(--danger);
-        }
-
-        .verify-result.partial {
-            background: linear-gradient(135deg, var(--warning-light) 0%, #fffbeb 100%);
-            border: 2px solid var(--warning);
-        }
-
-        .verify-result .status-icon {
-            font-size: 3rem;
+        .price-label {
+            font-size: 0.875rem;
+            color: var(--gray-400);
             margin-bottom: 8px;
         }
 
-        .verify-result .status-text {
-            font-size: 1.25rem;
+        .price-amount {
+            font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 12px;
+            letter-spacing: -1px;
         }
 
-        .verify-result.match .status-text { color: var(--success); }
-        .verify-result.mismatch .status-text { color: var(--danger); }
-        .verify-result.partial .status-text { color: var(--warning); }
-
-        .verify-details {
-            background: white;
-            border-radius: var(--radius);
-            padding: 16px;
+        .price-breakdown {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--gray-700);
+            font-size: 0.8125rem;
+            color: var(--gray-400);
             text-align: left;
         }
 
-        .verify-row {
+        .price-breakdown-item {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--gray-100);
-            font-size: 0.9375rem;
+            padding: 4px 0;
         }
 
-        .verify-row:last-child { border-bottom: none; }
-        .verify-row .label { color: var(--gray-600); }
-        .verify-row .value { font-weight: 600; color: var(--gray-800); }
-        .verify-row .value.positive { color: var(--success); }
-        .verify-row .value.negative { color: var(--danger); }
-        .verify-row .value.discount { color: var(--warning); }
-        .verify-row .value.add { color: var(--floor-7); }
-
-        .verify-section-title {
-            font-size: 0.75rem;
+        .price-breakdown-item.discount { color: var(--warning); }
+        .price-breakdown-item.add { color: var(--success); }
+        .price-breakdown-item.total {
+            border-top: 1px solid var(--gray-600);
+            margin-top: 8px;
+            padding-top: 8px;
             font-weight: 600;
-            color: var(--gray-500);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 12px;
-            margin-bottom: 8px;
-            padding-top: 12px;
-            border-top: 1px dashed var(--gray-200);
+            color: white;
         }
 
-        .difference-box {
-            margin-top: 12px;
-            padding: 12px;
-            border-radius: var(--radius);
-            font-size: 0.875rem;
-        }
-
-        .difference-box.over {
-            background: var(--danger-light);
-            color: #991b1b;
-        }
-
-        .difference-box.under {
-            background: var(--success-light);
-            color: #065f46;
-        }
-
-        .difference-box.exact {
-            background: var(--primary-light);
-            color: var(--primary);
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
         }
 
         .action-btn {
-            width: 100%;
             padding: 16px;
             border: none;
             border-radius: var(--radius);
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            margin-bottom: 12px;
         }
 
         .action-btn.primary { background: var(--primary); color: white; }
-        .action-btn.primary:hover { background: var(--primary-dark); }
-        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .action-btn.primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+        .action-btn.kakao { background: #FEE500; color: #191919; }
+        .action-btn.kakao:hover { background: #E6CF00; transform: translateY(-1px); }
+        .action-btn.success { background: var(--success); color: white; }
+        .action-btn.success:hover { background: #059669; transform: translateY(-1px); }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
 
-        .price-table { margin-top: 8px; }
-
-        .price-table-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--gray-100);
-            font-size: 0.875rem;
-        }
-
-        .price-table-row:last-child { border-bottom: none; }
-        .price-table-row .label { color: var(--gray-600); }
-        .price-table-row .value { font-weight: 600; color: var(--gray-800); }
-
-        .daily-rate-info {
-            background: var(--gray-50);
-            border-radius: var(--radius);
+        .add-student-btn {
+            width: 100%;
             padding: 12px;
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--radius);
+            background: transparent;
+            color: var(--gray-500);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             margin-top: 12px;
-            font-size: 0.8125rem;
-            color: var(--gray-600);
         }
+
+        .add-student-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 16px;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: white;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+
+        [data-theme="dark"] .modal { background: var(--gray-100); }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .modal-close {
+            width: 32px; height: 32px;
+            border: none;
+            background: var(--gray-100);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-500);
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover { background: var(--gray-200); color: var(--gray-700); }
+        .modal-body { padding: 20px; }
+
+        .form-group { margin-bottom: 16px; }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            font-size: 0.9375rem;
+            outline: none;
+            transition: all 0.2s ease;
+            background: white;
+            color: var(--gray-800);
+        }
+
+        [data-theme="dark"] .form-group input,
+        [data-theme="dark"] .form-group select {
+            background: var(--gray-200);
+            border-color: var(--gray-300);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-footer button {
+            flex: 1;
+            padding: 12px;
+            border-radius: var(--radius);
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel { background: var(--gray-100); border: none; color: var(--gray-600); }
+        .btn-cancel:hover { background: var(--gray-200); }
+        .btn-submit { background: var(--primary); border: none; color: white; }
+        .btn-submit:hover { background: var(--primary-dark); }
+        .btn-danger { background: var(--danger); border: none; color: white; }
+        .btn-danger:hover { background: #dc2626; }
 
         .toast {
             position: fixed;
@@ -702,6 +825,9 @@
             opacity: 0;
             transition: all 0.3s ease;
             z-index: 1001;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
@@ -714,42 +840,182 @@
             color: var(--gray-500);
         }
 
-        .student-list::-webkit-scrollbar { width: 6px; }
-        .student-list::-webkit-scrollbar-track { background: var(--gray-100); border-radius: 3px; }
-        .student-list::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }
+        .empty-state .icon {
+            width: 48px; height: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
 
-        .help-text {
-            font-size: 0.75rem;
+        .price-table { margin-top: 8px; }
+
+        .price-table-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--gray-100);
+            font-size: 0.875rem;
+        }
+
+        .price-table-row:last-child { border-bottom: none; }
+        .price-table-row .label { color: var(--gray-600); }
+        .price-table-row .value { font-weight: 600; color: var(--gray-800); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 16px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        [data-theme="dark"] .stat-card { background: var(--gray-100); }
+
+        .stat-card .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.8125rem;
             color: var(--gray-500);
             margin-top: 4px;
         }
 
-        .total-preview {
-            background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-900) 100%);
-            border-radius: var(--radius);
-            padding: 16px;
-            text-align: center;
-            color: white;
-            margin-bottom: 16px;
+        .stat-card.floor-8 .stat-value { color: var(--floor-8); }
+        .stat-card.floor-7 .stat-value { color: var(--floor-7); }
+
+        .seat-chart { margin-top: 16px; }
+
+        .seat-chart-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
         }
 
-        .total-preview .label {
-            font-size: 0.75rem;
-            color: var(--gray-400);
+        .seat-chart-label {
+            width: 80px;
+            font-size: 0.8125rem;
+            color: var(--gray-600);
+        }
+
+        .seat-chart-bar-bg {
+            flex: 1;
+            height: 24px;
+            background: var(--gray-100);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .seat-chart-bar {
+            height: 100%;
+            border-radius: 12px;
+            transition: width 0.5s ease;
+        }
+
+        .seat-chart-bar.자유석 { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+        .seat-chart-bar.지정석_여 { background: linear-gradient(90deg, #ec4899, #db2777); }
+        .seat-chart-bar.지정석_남 { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+        .seat-chart-bar.칸막이 { background: linear-gradient(90deg, #10b981, #059669); }
+        .seat-chart-bar.프리미엄 { background: linear-gradient(90deg, #f59e0b, #d97706); }
+
+        .seat-chart-count {
+            width: 50px;
+            text-align: right;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+
+        .history-item {
+            padding: 16px;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item:last-child { border-bottom: none; }
+
+        .history-info h4 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--gray-800);
             margin-bottom: 4px;
         }
 
-        .total-preview .amount {
-            font-size: 1.75rem;
-            font-weight: 700;
+        .history-info p {
+            font-size: 0.8125rem;
+            color: var(--gray-500);
         }
+
+        .history-amount {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .history-delete {
+            margin-left: 12px;
+            width: 28px; height: 28px;
+            border: none;
+            background: var(--gray-100);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-400);
+            transition: all 0.2s ease;
+        }
+
+        .history-delete:hover { background: var(--danger-light); color: var(--danger); }
+
+        .recent-students {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .recent-student-chip {
+            flex-shrink: 0;
+            padding: 8px 14px;
+            background: var(--primary-light);
+            border: 1px solid var(--primary);
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .recent-student-chip:hover { background: var(--primary); color: white; }
+
+        .student-list::-webkit-scrollbar,
+        .recent-students::-webkit-scrollbar { width: 6px; height: 6px; }
+
+        .student-list::-webkit-scrollbar-track,
+        .recent-students::-webkit-scrollbar-track { background: var(--gray-100); border-radius: 3px; }
+
+        .student-list::-webkit-scrollbar-thumb,
+        .recent-students::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>📚 김엄마독서실</h1>
-            <div class="version">결제 검증 시스템 v2</div>
+            <div class="version">결제 계산기 v2</div>
             <div class="header-actions">
                 <button class="icon-btn" onclick="toggleTheme()" title="다크모드">
                     <svg id="theme-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -760,13 +1026,13 @@
         </div>
 
         <div class="nav-tabs">
-            <button class="nav-tab active" onclick="switchSection('verify')">🔍 검증</button>
-            <button class="nav-tab" onclick="switchSection('calculator')">💰 계산기</button>
-            <button class="nav-tab" onclick="switchSection('rates')">📋 요금표</button>
+            <button class="nav-tab active" onclick="switchSection('calculator')">💰 계산기</button>
+            <button class="nav-tab" onclick="switchSection('stats')">📊 통계</button>
+            <button class="nav-tab" onclick="switchSection('history')">📋 내역</button>
         </div>
 
-        <!-- 검증 섹션 -->
-        <div class="section active" id="section-verify">
+        <!-- Calculator Section -->
+        <div class="section active" id="section-calculator">
             <div class="floor-tabs">
                 <button class="floor-tab floor-8 active" onclick="selectFloor(8)">
                     <span>8층</span>
@@ -778,9 +1044,16 @@
                 </button>
             </div>
 
+            <div class="recent-students" id="recent-students" style="display: none;"></div>
+
             <div class="card">
                 <div class="card-header">
-                    <h2>👤 학생 선택</h2>
+                    <h2>
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        학생 선택
+                    </h2>
                 </div>
                 <div class="card-body">
                     <div class="seat-filter" id="seat-filter"></div>
@@ -791,16 +1064,27 @@
                         <input type="text" id="student-search" placeholder="학생 이름 검색..." oninput="filterStudents()">
                     </div>
                     <div class="student-list" id="student-list"></div>
+                    <button class="add-student-btn" onclick="openAddModal()">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        신규 학생 추가
+                    </button>
                 </div>
             </div>
 
-            <div class="card" id="verify-card" style="display: none;">
+            <div class="card" id="calculation-card" style="display: none;">
                 <div class="card-header">
-                    <h2>🔍 결제 검증</h2>
+                    <h2>
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        </svg>
+                        결제 계산
+                    </h2>
                 </div>
                 <div class="card-body">
                     <div class="selected-student-card" id="selected-student-info"></div>
-
+                    
                     <div class="form-group">
                         <label>이용 기간</label>
                         <div class="period-grid">
@@ -810,34 +1094,21 @@
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>결제일 (등원일)</label>
-                            <input type="number" id="payment-day" placeholder="예: 15" min="1" max="31" oninput="updatePreview()">
-                            <div class="help-text">월 기준 등원 시작일</div>
-                        </div>
-                        <div class="form-group">
-                            <label>제외 일수</label>
-                            <input type="number" id="exclude-days" placeholder="0" min="0" value="0" oninput="updatePreview()">
-                            <div class="help-text">방학 등 제외</div>
-                        </div>
-                    </div>
-
-                    <!-- 옵션 섹션 -->
+                    <!-- 추가 옵션 섹션 -->
                     <div class="options-section">
                         <div class="options-title">⚙️ 추가 옵션</div>
                         
                         <!-- 사물함 -->
                         <div class="option-item" onclick="toggleOption('locker')">
-                            <input type="checkbox" id="opt-locker" onchange="updatePreview()">
+                            <input type="checkbox" id="opt-locker" onchange="calculatePrice()">
                             <span class="option-label">🔐 사물함</span>
                             <span class="option-value">+20,000원/월</span>
                         </div>
 
                         <!-- 할인 -->
-                        <div class="options-title" style="margin-top: 16px; border-top: none; padding-top: 0;">🏷️ 할인 적용</div>
+                        <div class="options-title" style="margin-top: 12px; border: none; padding: 0;">🏷️ 할인 적용</div>
                         <div class="discount-btn-group">
-                            <button class="discount-btn" data-discount="0" onclick="selectDiscount(0)">없음</button>
+                            <button class="discount-btn active" data-discount="0" onclick="selectDiscount(0)">없음</button>
                             <button class="discount-btn" data-discount="10" onclick="selectDiscount(10)">10%</button>
                             <button class="discount-btn" data-discount="20" onclick="selectDiscount(20)">20%</button>
                         </div>
@@ -845,165 +1116,186 @@
                         <!-- 멘토링 -->
                         <div class="option-input-group">
                             <label>📝 멘토링비</label>
-                            <input type="number" id="mentoring-fee" placeholder="0" min="0" oninput="updatePreview()">
+                            <input type="number" id="mentoring-fee" placeholder="0" min="0" oninput="calculatePrice()">
                             <span style="color: var(--gray-500); font-size: 0.875rem;">원</span>
                         </div>
                     </div>
 
-                    <!-- 예상 금액 미리보기 -->
-                    <div class="total-preview" id="total-preview">
-                        <div class="label">예상 결제금액</div>
-                        <div class="amount">₩0</div>
+                    <div class="price-display">
+                        <div class="price-label">총 결제 금액</div>
+                        <div class="price-amount" id="total-price">₩0</div>
+                        <div class="price-breakdown" id="price-breakdown"></div>
                     </div>
 
-                    <div class="form-group">
-                        <label>실제 결제금액 (원)</label>
-                        <input type="number" id="actual-amount" placeholder="스프레드시트 금액 입력" oninput="updatePreview()">
+                    <div class="action-buttons">
+                        <button class="action-btn primary" id="copy-btn" onclick="copyPrice()" disabled>
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+                            </svg>
+                            금액 복사
+                        </button>
+                        <button class="action-btn kakao" id="kakao-btn" onclick="copyKakaoMessage()" disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 3C6.48 3 2 6.58 2 11c0 2.82 1.86 5.29 4.65 6.71-.15.53-.54 1.92-.62 2.22-.1.37.14.37.29.27.12-.08 1.89-1.28 2.65-1.8.67.1 1.36.15 2.03.15 5.52 0 10-3.58 10-8C22 6.58 17.52 3 12 3z"/>
+                            </svg>
+                            카톡 메시지
+                        </button>
                     </div>
-
-                    <button class="action-btn primary" id="verify-btn" onclick="verifyPayment()" disabled>
-                        🔍 검증하기
+                    <button class="action-btn success" id="save-btn" onclick="savePayment()" disabled style="margin-top: 12px; width: 100%;">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        결제 내역 저장
                     </button>
                 </div>
             </div>
 
-            <div id="verify-result-container"></div>
-        </div>
-
-        <!-- 계산기 섹션 -->
-        <div class="section" id="section-calculator">
             <div class="card">
                 <div class="card-header">
-                    <h2>💰 결제 계산기</h2>
+                    <h2>
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <span id="price-table-title">8층 요금표</span>
+                    </h2>
                 </div>
                 <div class="card-body">
-                    <div class="form-group">
-                        <label>좌석 유형</label>
-                        <select id="calc-seat-type" onchange="updateCalc()">
-                            <option value="자유석">자유석 (8층)</option>
-                            <option value="지정석_여">지정석_여 (8층/7층)</option>
-                            <option value="지정석_남">지정석_남 (8층/7층)</option>
-                            <option value="칸막이">칸막이 (8층/7층)</option>
-                            <option value="프리미엄">프리미엄 (7층)</option>
-                        </select>
-                    </div>
-
-                    <div class="form-row-3">
-                        <div class="form-group">
-                            <label>기간</label>
-                            <select id="calc-period" onchange="updateCalc()">
-                                <option value="1">1개월</option>
-                                <option value="2">2개월</option>
-                                <option value="3">3개월</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>등원일</label>
-                            <input type="number" id="calc-day" placeholder="1" min="1" max="31" value="1" oninput="updateCalc()">
-                        </div>
-                        <div class="form-group">
-                            <label>제외일</label>
-                            <input type="number" id="calc-exclude" placeholder="0" min="0" value="0" oninput="updateCalc()">
-                        </div>
-                    </div>
-
-                    <div class="options-section">
-                        <div class="options-title">⚙️ 추가 옵션</div>
-                        
-                        <div class="option-item" onclick="toggleCalcOption('locker')">
-                            <input type="checkbox" id="calc-opt-locker" onchange="updateCalc()">
-                            <span class="option-label">🔐 사물함</span>
-                            <span class="option-value">+20,000원/월</span>
-                        </div>
-
-                        <div class="options-title" style="margin-top: 16px; border-top: none; padding-top: 0;">🏷️ 할인</div>
-                        <div class="discount-btn-group">
-                            <button class="discount-btn calc-discount" data-discount="0" onclick="selectCalcDiscount(0)">없음</button>
-                            <button class="discount-btn calc-discount" data-discount="10" onclick="selectCalcDiscount(10)">10%</button>
-                            <button class="discount-btn calc-discount" data-discount="20" onclick="selectCalcDiscount(20)">20%</button>
-                        </div>
-
-                        <div class="option-input-group">
-                            <label>📝 멘토링비</label>
-                            <input type="number" id="calc-mentoring" placeholder="0" min="0" oninput="updateCalc()">
-                            <span style="color: var(--gray-500); font-size: 0.875rem;">원</span>
-                        </div>
-                    </div>
-
-                    <div id="calc-result" style="margin-top: 16px;"></div>
+                    <div class="price-table" id="price-table"></div>
                 </div>
             </div>
         </div>
 
-        <!-- 요금표 섹션 -->
-        <div class="section" id="section-rates">
-            <div class="card">
-                <div class="card-header">
-                    <h2>📋 8층 요금표</h2>
+        <!-- Stats Section -->
+        <div class="section" id="section-stats">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-total">161</div>
+                    <div class="stat-label">전체 학생</div>
                 </div>
-                <div class="card-body">
-                    <div class="price-table">
-                        <div class="price-table-row"><span class="label">자유석 1개월</span><span class="value">220,000원</span></div>
-                        <div class="price-table-row"><span class="label">자유석 2개월</span><span class="value">400,000원</span></div>
-                        <div class="price-table-row"><span class="label">자유석 3개월</span><span class="value">540,000원</span></div>
-                        <div class="price-table-row"><span class="label">지정석 1개월</span><span class="value">350,000원</span></div>
-                        <div class="price-table-row"><span class="label">지정석 2개월</span><span class="value">640,000원</span></div>
-                        <div class="price-table-row"><span class="label">지정석 3개월</span><span class="value">870,000원</span></div>
-                        <div class="price-table-row"><span class="label">칸막이 1개월</span><span class="value">400,000원</span></div>
-                        <div class="price-table-row"><span class="label">칸막이 2개월</span><span class="value">730,000원</span></div>
-                        <div class="price-table-row"><span class="label">칸막이 3개월</span><span class="value">1,000,000원</span></div>
-                    </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-payments">0</div>
+                    <div class="stat-label">이번 달 결제</div>
                 </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h2>📋 7층 요금표</h2>
+                <div class="stat-card floor-8">
+                    <div class="stat-value" id="stat-floor8">115</div>
+                    <div class="stat-label">8층 학생</div>
                 </div>
-                <div class="card-body">
-                    <div class="price-table">
-                        <div class="price-table-row"><span class="label">프리미엄 1개월</span><span class="value">450,000원</span></div>
-                        <div class="price-table-row"><span class="label">프리미엄 2개월</span><span class="value">820,000원</span></div>
-                        <div class="price-table-row"><span class="label">프리미엄 3개월</span><span class="value">1,120,000원</span></div>
-                        <div class="price-table-row"><span class="label">지정석 1개월</span><span class="value">350,000원</span></div>
-                        <div class="price-table-row"><span class="label">지정석 2개월</span><span class="value">640,000원</span></div>
-                        <div class="price-table-row"><span class="label">지정석 3개월</span><span class="value">870,000원</span></div>
-                        <div class="price-table-row"><span class="label">칸막이 1개월</span><span class="value">400,000원</span></div>
-                        <div class="price-table-row"><span class="label">칸막이 2개월</span><span class="value">730,000원</span></div>
-                        <div class="price-table-row"><span class="label">칸막이 3개월</span><span class="value">1,000,000원</span></div>
-                    </div>
+                <div class="stat-card floor-7">
+                    <div class="stat-value" id="stat-floor7">46</div>
+                    <div class="stat-label">7층 학생</div>
                 </div>
             </div>
 
             <div class="card">
+                <div class="card-header"><h2>📊 8층 좌석 현황</h2></div>
+                <div class="card-body"><div class="seat-chart" id="chart-floor8"></div></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h2>📊 7층 좌석 현황</h2></div>
+                <div class="card-body"><div class="seat-chart" id="chart-floor7"></div></div>
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div class="section" id="section-history">
+            <div class="card">
                 <div class="card-header">
-                    <h2>📋 추가 옵션</h2>
+                    <h2>📋 결제 내역</h2>
+                    <button class="icon-btn" onclick="exportHistory()" title="내보내기">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                    </button>
                 </div>
-                <div class="card-body">
-                    <div class="price-table">
-                        <div class="price-table-row"><span class="label">🔐 사물함</span><span class="value">20,000원/월</span></div>
-                        <div class="price-table-row"><span class="label">🏷️ 쿠폰 할인</span><span class="value">10% 또는 20%</span></div>
-                        <div class="price-table-row"><span class="label">📝 멘토링</span><span class="value">금액 별도</span></div>
-                    </div>
-                    <div class="daily-rate-info">
-                        <strong>💡 일할 계산 방식</strong><br>
-                        • 기본요금 ÷ 30일 × 이용일수<br>
-                        • 등원일 기준: 31 - 등원일 = 이용일수<br>
-                        • 할인은 좌석요금에만 적용 (사물함/멘토링 제외)
-                    </div>
+                <div class="card-body" style="padding: 0;">
+                    <div id="history-list"></div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Add/Edit Modal -->
+    <div class="modal-overlay" id="student-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">신규 학생 추가</h3>
+                <button class="modal-close" onclick="closeStudentModal()">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-index">
+                <div class="form-group">
+                    <label>학생 이름 *</label>
+                    <input type="text" id="modal-name" placeholder="홍길동">
+                </div>
+                <div class="form-group">
+                    <label>층</label>
+                    <select id="modal-floor" onchange="updateModalSeatTypes()">
+                        <option value="8">8층</option>
+                        <option value="7">7층</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>좌석 유형 *</label>
+                    <select id="modal-seat-type"></select>
+                </div>
+                <div class="form-group">
+                    <label>좌석 번호</label>
+                    <input type="text" id="modal-seat-number" placeholder="예: 101">
+                </div>
+                <div class="form-group">
+                    <label>학생 전화번호</label>
+                    <input type="tel" id="modal-student-phone" placeholder="010-0000-0000">
+                </div>
+                <div class="form-group">
+                    <label>학부모 전화번호</label>
+                    <input type="tel" id="modal-parent-phone" placeholder="010-0000-0000">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeStudentModal()">취소</button>
+                <button class="btn-submit" id="modal-submit" onclick="saveStudent()">추가하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>학생 삭제</h3>
+                <button class="modal-close" onclick="closeDeleteModal()">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="delete-message">정말 삭제하시겠습니까?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeDeleteModal()">취소</button>
+                <button class="btn-danger" onclick="confirmDelete()">삭제</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast">
-        <span id="toast-message">메시지</span>
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+        <span id="toast-message">복사되었습니다</span>
     </div>
 
     <script>
         const priceData = {
             8: {
                 '자유석': { 1: 220000, 2: 400000, 3: 540000 },
+                '지정석': { 1: 350000, 2: 640000, 3: 870000 },
                 '지정석_여': { 1: 350000, 2: 640000, 3: 870000 },
                 '지정석_남': { 1: 350000, 2: 640000, 3: 870000 },
                 '칸막이': { 1: 400000, 2: 730000, 3: 1000000 }
@@ -1023,8 +1315,8 @@
             7: ['전체', '프리미엄', '지정석_여', '지정석_남', '칸막이']
         };
 
-        // 8층 115명 학생 데이터
-        const students = {
+        // 8층 학생 115명
+        const defaultStudents = {
             8: [
                 { name: '양준빈', phone: '010-5029-5112', parentPhone: '010-7652-5112', seatType: '자유석', seatNumber: '101' },
                 { name: '최준서', phone: '010-3085-7594', parentPhone: '010-3082-7594', seatType: '자유석', seatNumber: '102' },
@@ -1192,31 +1484,56 @@
             ]
         };
 
+        let students = JSON.parse(JSON.stringify(defaultStudents));
+        let paymentHistory = [];
+        let recentStudents = [];
         let currentFloor = 8;
         let selectedStudent = null;
         let selectedPeriod = null;
         let selectedSeatFilter = '전체';
         let selectedDiscount = 0;
-        let calcDiscount = 0;
+        let deleteTarget = null;
 
         document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            updateCounts();
             renderSeatFilter();
             renderStudentList();
-            updateCalc();
-            selectDiscount(0);
-            selectCalcDiscount(0);
+            renderPriceTable();
+            renderRecentStudents();
+            updateStats();
+            renderHistory();
+            updateModalSeatTypes();
             
             const savedTheme = localStorage.getItem('kimomma_theme');
             if (savedTheme === 'dark') {
                 document.documentElement.setAttribute('data-theme', 'dark');
+                updateThemeIcon();
             }
         });
+
+        function loadData() {
+            const saved = localStorage.getItem('kimomma_students_v3');
+            if (saved) students = JSON.parse(saved);
+            const hist = localStorage.getItem('kimomma_history');
+            if (hist) paymentHistory = JSON.parse(hist);
+            const recent = localStorage.getItem('kimomma_recent');
+            if (recent) recentStudents = JSON.parse(recent);
+        }
+
+        function saveData() {
+            localStorage.setItem('kimomma_students_v3', JSON.stringify(students));
+            localStorage.setItem('kimomma_history', JSON.stringify(paymentHistory));
+            localStorage.setItem('kimomma_recent', JSON.stringify(recentStudents));
+        }
 
         function switchSection(section) {
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             event.target.classList.add('active');
             document.getElementById(`section-${section}`).classList.add('active');
+            if (section === 'stats') updateStats();
+            if (section === 'history') renderHistory();
         }
 
         function selectFloor(floor) {
@@ -1226,14 +1543,21 @@
             selectedSeatFilter = '전체';
             document.querySelectorAll('.floor-tab').forEach(t => t.classList.remove('active'));
             document.querySelector(`.floor-tab.floor-${floor}`).classList.add('active');
-            document.getElementById('verify-card').style.display = 'none';
-            document.getElementById('verify-result-container').innerHTML = '';
+            document.getElementById('calculation-card').style.display = 'none';
+            document.getElementById('price-table-title').textContent = `${floor}층 요금표`;
             renderSeatFilter();
             renderStudentList();
+            renderPriceTable();
+        }
+
+        function updateCounts() {
+            document.getElementById('floor8-count').textContent = `${students[8].length}명`;
+            document.getElementById('floor7-count').textContent = `${students[7].length}명`;
         }
 
         function renderSeatFilter() {
-            document.getElementById('seat-filter').innerHTML = seatTypes[currentFloor].map(type => `
+            const container = document.getElementById('seat-filter');
+            container.innerHTML = seatTypes[currentFloor].map(type => `
                 <button class="seat-filter-btn ${selectedSeatFilter === type ? 'active' : ''}" 
                         onclick="filterBySeatType('${type}')">${type}</button>
             `).join('');
@@ -1268,7 +1592,21 @@
                         <span class="student-name">${s.name}</span>
                         <span class="student-detail">${s.seatNumber}번 좌석</span>
                     </div>
-                    <span class="seat-badge ${s.seatType}">${s.seatType}</span>
+                    <div style="display:flex;align-items:center;">
+                        <span class="seat-badge ${s.seatType}">${s.seatType}</span>
+                        <div class="student-actions" onclick="event.stopPropagation()">
+                            <button class="student-action-btn edit" onclick="openEditModal(${s._index})">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                            </button>
+                            <button class="student-action-btn delete" onclick="openDeleteModal(${s._index}, '${s.name}')">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             `).join('');
         }
@@ -1278,8 +1616,9 @@
             selectedStudent._floor = currentFloor;
             selectedPeriod = null;
             selectedDiscount = 0;
+            addToRecent(selectedStudent.name, currentFloor);
             
-            document.getElementById('verify-card').style.display = 'block';
+            document.getElementById('calculation-card').style.display = 'block';
             document.getElementById('selected-student-info').innerHTML = `
                 <div class="name">${selectedStudent.name} (${currentFloor}층)</div>
                 <div class="details">
@@ -1290,324 +1629,418 @@
             
             // 초기화
             document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('selected'));
-            document.getElementById('payment-day').value = '';
-            document.getElementById('exclude-days').value = '0';
             document.getElementById('opt-locker').checked = false;
             document.getElementById('mentoring-fee').value = '';
-            document.getElementById('actual-amount').value = '';
-            document.getElementById('verify-btn').disabled = true;
-            document.getElementById('verify-result-container').innerHTML = '';
             selectDiscount(0);
-            updatePreview();
+            document.getElementById('total-price').textContent = '₩0';
+            document.getElementById('price-breakdown').innerHTML = '';
+            document.getElementById('copy-btn').disabled = true;
+            document.getElementById('kakao-btn').disabled = true;
+            document.getElementById('save-btn').disabled = true;
             
             renderStudentList();
-            document.getElementById('verify-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            document.getElementById('calculation-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function addToRecent(name, floor) {
+            const key = `${floor}-${name}`;
+            recentStudents = recentStudents.filter(r => `${r.floor}-${r.name}` !== key);
+            recentStudents.unshift({ name, floor });
+            if (recentStudents.length > 5) recentStudents.pop();
+            saveData();
+            renderRecentStudents();
+        }
+
+        function renderRecentStudents() {
+            const container = document.getElementById('recent-students');
+            if (!recentStudents.length) { container.style.display = 'none'; return; }
+            container.style.display = 'flex';
+            container.innerHTML = recentStudents.map(r => `
+                <div class="recent-student-chip" onclick="selectRecentStudent('${r.name}', ${r.floor})">${r.name} (${r.floor}층)</div>
+            `).join('');
+        }
+
+        function selectRecentStudent(name, floor) {
+            if (currentFloor !== floor) selectFloor(floor);
+            const idx = students[floor].findIndex(s => s.name === name);
+            if (idx >= 0) selectStudent(idx);
         }
 
         function selectPeriod(months) {
             if (!selectedStudent) return;
             selectedPeriod = months;
             document.querySelectorAll('.period-btn').forEach(b => b.classList.toggle('selected', b.dataset.period == months));
-            updatePreview();
+            calculatePrice();
         }
 
         function toggleOption(type) {
             const checkbox = document.getElementById(`opt-${type}`);
             checkbox.checked = !checkbox.checked;
             checkbox.closest('.option-item').classList.toggle('active', checkbox.checked);
-            updatePreview();
+            calculatePrice();
         }
 
         function selectDiscount(rate) {
             selectedDiscount = rate;
-            document.querySelectorAll('.discount-btn:not(.calc-discount)').forEach(btn => {
+            document.querySelectorAll('.discount-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.discount == rate);
             });
-            updatePreview();
+            calculatePrice();
         }
 
-        function calculateExpectedAmount() {
-            if (!selectedStudent || !selectedPeriod) return 0;
+        function calculatePrice() {
+            if (!selectedStudent || !selectedPeriod) return;
             
-            const paymentDay = parseInt(document.getElementById('payment-day').value) || 1;
-            const excludeDays = parseInt(document.getElementById('exclude-days').value) || 0;
+            const basePrice = priceData[currentFloor][selectedStudent.seatType][selectedPeriod];
             const hasLocker = document.getElementById('opt-locker').checked;
             const mentoringFee = parseInt(document.getElementById('mentoring-fee').value) || 0;
             
-            // 기준 금액
-            const basePrice = priceData[currentFloor][selectedStudent.seatType][selectedPeriod];
-            const dailyRate = basePrice / 30;
-            
-            // 이용일수
-            const useDays = Math.max(0, 31 - paymentDay - excludeDays);
-            
-            // 일할 계산
-            let seatPrice;
-            if (paymentDay === 1 && excludeDays === 0) {
-                seatPrice = basePrice;
-            } else {
-                seatPrice = Math.round(dailyRate * useDays);
-            }
-            
             // 할인 적용 (좌석요금에만)
-            const discountedSeatPrice = Math.round(seatPrice * (1 - selectedDiscount / 100));
+            const discountAmount = Math.round(basePrice * selectedDiscount / 100);
+            const discountedSeatPrice = basePrice - discountAmount;
             
             // 사물함 (기간에 맞게)
             const lockerFee = hasLocker ? LOCKER_FEE * selectedPeriod : 0;
             
             // 총액
-            const totalAmount = discountedSeatPrice + lockerFee + mentoringFee;
+            const totalPrice = discountedSeatPrice + lockerFee + mentoringFee;
             
-            return {
-                basePrice,
-                dailyRate,
-                useDays,
-                seatPrice,
-                discountedSeatPrice,
-                discountAmount: seatPrice - discountedSeatPrice,
-                lockerFee,
-                mentoringFee,
-                totalAmount
-            };
+            document.getElementById('total-price').textContent = `₩${totalPrice.toLocaleString()}`;
+            
+            // 상세 내역
+            let breakdown = `<div class="price-breakdown-item"><span>좌석료 (${selectedStudent.seatType} ${selectedPeriod}개월)</span><span>${basePrice.toLocaleString()}원</span></div>`;
+            
+            if (selectedDiscount > 0) {
+                breakdown += `<div class="price-breakdown-item discount"><span>🏷️ 할인 (${selectedDiscount}%)</span><span>-${discountAmount.toLocaleString()}원</span></div>`;
+            }
+            
+            if (hasLocker) {
+                breakdown += `<div class="price-breakdown-item add"><span>🔐 사물함 (${selectedPeriod}개월)</span><span>+${lockerFee.toLocaleString()}원</span></div>`;
+            }
+            
+            if (mentoringFee > 0) {
+                breakdown += `<div class="price-breakdown-item add"><span>📝 멘토링</span><span>+${mentoringFee.toLocaleString()}원</span></div>`;
+            }
+            
+            breakdown += `<div class="price-breakdown-item total"><span>총 결제금액</span><span>${totalPrice.toLocaleString()}원</span></div>`;
+            
+            document.getElementById('price-breakdown').innerHTML = breakdown;
+            document.getElementById('copy-btn').disabled = false;
+            document.getElementById('kakao-btn').disabled = false;
+            document.getElementById('save-btn').disabled = false;
         }
 
-        function updatePreview() {
-            const calc = calculateExpectedAmount();
-            document.getElementById('total-preview').innerHTML = `
-                <div class="label">예상 결제금액</div>
-                <div class="amount">₩${calc.totalAmount.toLocaleString()}</div>
-            `;
-            
-            const canVerify = selectedStudent && selectedPeriod && document.getElementById('actual-amount').value;
-            document.getElementById('verify-btn').disabled = !canVerify;
+        function getTotalPrice() {
+            if (!selectedStudent || !selectedPeriod) return 0;
+            const basePrice = priceData[currentFloor][selectedStudent.seatType][selectedPeriod];
+            const hasLocker = document.getElementById('opt-locker').checked;
+            const mentoringFee = parseInt(document.getElementById('mentoring-fee').value) || 0;
+            const discountedSeatPrice = basePrice - Math.round(basePrice * selectedDiscount / 100);
+            const lockerFee = hasLocker ? LOCKER_FEE * selectedPeriod : 0;
+            return discountedSeatPrice + lockerFee + mentoringFee;
         }
 
-        function verifyPayment() {
+        function copyPrice() {
+            if (!selectedStudent || !selectedPeriod) return;
+            const totalPrice = getTotalPrice();
+            let text = `${selectedStudent.name} ${currentFloor}층 ${selectedStudent.seatType} ${selectedPeriod}개월: ${totalPrice.toLocaleString()}원`;
+            if (selectedDiscount > 0) text += ` (${selectedDiscount}% 할인)`;
+            navigator.clipboard.writeText(text);
+            showToast('금액이 복사되었습니다');
+        }
+
+        function copyKakaoMessage() {
             if (!selectedStudent || !selectedPeriod) return;
             
-            const calc = calculateExpectedAmount();
-            const actualAmount = parseInt(document.getElementById('actual-amount').value) || 0;
-            const paymentDay = parseInt(document.getElementById('payment-day').value) || 1;
-            const excludeDays = parseInt(document.getElementById('exclude-days').value) || 0;
+            const basePrice = priceData[currentFloor][selectedStudent.seatType][selectedPeriod];
+            const hasLocker = document.getElementById('opt-locker').checked;
+            const mentoringFee = parseInt(document.getElementById('mentoring-fee').value) || 0;
+            const totalPrice = getTotalPrice();
             
-            // 차이 계산
-            const difference = actualAmount - calc.totalAmount;
-            const diffPercent = calc.totalAmount > 0 ? ((actualAmount / calc.totalAmount) * 100 - 100).toFixed(1) : 0;
+            const today = new Date();
+            const end = new Date(today);
+            end.setMonth(end.getMonth() + selectedPeriod);
+            const fmt = d => `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`;
             
-            // 오차 범위
-            const tolerance = calc.totalAmount * 0.05;
-            let status, statusText;
-            
-            if (Math.abs(difference) <= 1000) {
-                status = 'match';
-                statusText = '✅ 정확히 일치!';
-            } else if (Math.abs(difference) <= tolerance) {
-                status = 'partial';
-                statusText = '⚠️ 근사치 (오차 5% 이내)';
-            } else {
-                status = 'mismatch';
-                statusText = '❌ 불일치';
+            let details = `• 좌석료: ${basePrice.toLocaleString()}원`;
+            if (selectedDiscount > 0) {
+                details += `\n• 할인 (${selectedDiscount}%): -${Math.round(basePrice * selectedDiscount / 100).toLocaleString()}원`;
+            }
+            if (hasLocker) {
+                details += `\n• 사물함 (${selectedPeriod}개월): +${(LOCKER_FEE * selectedPeriod).toLocaleString()}원`;
+            }
+            if (mentoringFee > 0) {
+                details += `\n• 멘토링: +${mentoringFee.toLocaleString()}원`;
             }
             
-            // 차이 설명
-            let diffExplanation = '';
-            if (difference > 0) {
-                diffExplanation = `실제 금액이 ${Math.abs(difference).toLocaleString()}원 더 많습니다.`;
-            } else if (difference < 0) {
-                diffExplanation = `실제 금액이 ${Math.abs(difference).toLocaleString()}원 적습니다.`;
-            } else {
-                diffExplanation = '정확히 일치합니다!';
-            }
+            const msg = `안녕하세요, 김엄마독서실입니다 📚
+
+${selectedStudent.name} 학생 이용료 안내드립니다.
+
+━━━━━━━━━━━━━━━
+📍 이용 정보
+━━━━━━━━━━━━━━━
+• 층: ${currentFloor}층
+• 좌석: ${selectedStudent.seatType} ${selectedStudent.seatNumber}번
+• 기간: ${selectedPeriod}개월 (${selectedPeriod * 4}주)
+
+━━━━━━━━━━━━━━━
+💰 결제 내역
+━━━━━━━━━━━━━━━
+${details}
+
+━━━━━━━━━━━━━━━
+💳 총 결제금액: ${totalPrice.toLocaleString()}원
+━━━━━━━━━━━━━━━
+
+📅 이용 기간
+${fmt(today)} ~ ${fmt(end)}
+
+감사합니다 🙏`;
+            navigator.clipboard.writeText(msg);
+            showToast('카카오톡 메시지가 복사되었습니다', 'success');
+        }
+
+        function savePayment() {
+            if (!selectedStudent || !selectedPeriod) return;
+            const totalPrice = getTotalPrice();
+            const hasLocker = document.getElementById('opt-locker').checked;
+            const mentoringFee = parseInt(document.getElementById('mentoring-fee').value) || 0;
+            const today = new Date();
+            const end = new Date(today);
+            end.setMonth(end.getMonth() + selectedPeriod);
             
-            document.getElementById('verify-result-container').innerHTML = `
-                <div class="verify-result ${status}">
-                    <div class="status-text">${statusText}</div>
-                    
-                    <div class="verify-details">
-                        <div class="verify-section-title">📍 기본 정보</div>
-                        <div class="verify-row">
-                            <span class="label">좌석 유형</span>
-                            <span class="value">${selectedStudent.seatType}</span>
-                        </div>
-                        <div class="verify-row">
-                            <span class="label">기간</span>
-                            <span class="value">${selectedPeriod}개월</span>
-                        </div>
-                        <div class="verify-row">
-                            <span class="label">기본 요금</span>
-                            <span class="value">${calc.basePrice.toLocaleString()}원</span>
-                        </div>
-                        
-                        <div class="verify-section-title">📅 일할 계산</div>
-                        <div class="verify-row">
-                            <span class="label">등원일</span>
-                            <span class="value">${paymentDay}일</span>
-                        </div>
-                        ${excludeDays > 0 ? `
-                        <div class="verify-row">
-                            <span class="label">제외일수</span>
-                            <span class="value">${excludeDays}일</span>
-                        </div>
-                        ` : ''}
-                        <div class="verify-row">
-                            <span class="label">이용일수</span>
-                            <span class="value">${calc.useDays}일</span>
-                        </div>
-                        <div class="verify-row">
-                            <span class="label">일할 계산액</span>
-                            <span class="value">${calc.seatPrice.toLocaleString()}원</span>
-                        </div>
-                        
-                        ${selectedDiscount > 0 ? `
-                        <div class="verify-section-title">🏷️ 할인</div>
-                        <div class="verify-row">
-                            <span class="label">할인율</span>
-                            <span class="value discount">${selectedDiscount}%</span>
-                        </div>
-                        <div class="verify-row">
-                            <span class="label">할인금액</span>
-                            <span class="value discount">-${calc.discountAmount.toLocaleString()}원</span>
-                        </div>
-                        <div class="verify-row">
-                            <span class="label">할인 후 좌석료</span>
-                            <span class="value">${calc.discountedSeatPrice.toLocaleString()}원</span>
-                        </div>
-                        ` : ''}
-                        
-                        ${(calc.lockerFee > 0 || calc.mentoringFee > 0) ? `
-                        <div class="verify-section-title">➕ 추가 비용</div>
-                        ${calc.lockerFee > 0 ? `
-                        <div class="verify-row">
-                            <span class="label">🔐 사물함 (${selectedPeriod}개월)</span>
-                            <span class="value add">+${calc.lockerFee.toLocaleString()}원</span>
-                        </div>
-                        ` : ''}
-                        ${calc.mentoringFee > 0 ? `
-                        <div class="verify-row">
-                            <span class="label">📝 멘토링</span>
-                            <span class="value add">+${calc.mentoringFee.toLocaleString()}원</span>
-                        </div>
-                        ` : ''}
-                        ` : ''}
-                        
-                        <div class="verify-section-title">💰 최종 비교</div>
-                        <div class="verify-row" style="background: var(--gray-50); margin: 0 -16px; padding: 12px 16px;">
-                            <span class="label"><strong>예상 금액</strong></span>
-                            <span class="value"><strong>${calc.totalAmount.toLocaleString()}원</strong></span>
-                        </div>
-                        <div class="verify-row" style="background: var(--primary-light); margin: 0 -16px; padding: 12px 16px;">
-                            <span class="label"><strong>실제 금액</strong></span>
-                            <span class="value"><strong>${actualAmount.toLocaleString()}원</strong></span>
-                        </div>
-                        <div class="verify-row">
-                            <span class="label">차이</span>
-                            <span class="value ${difference > 0 ? 'positive' : difference < 0 ? 'negative' : ''}">${difference >= 0 ? '+' : ''}${difference.toLocaleString()}원 (${diffPercent}%)</span>
-                        </div>
-                    </div>
-                    
-                    <div class="difference-box ${difference > 0 ? 'over' : difference < 0 ? 'under' : 'exact'}">
-                        💡 ${diffExplanation}
-                        ${Math.abs(difference) > tolerance ? '<br><br>📋 가능한 원인: 추가 일수, 다른 할인율, 기타 비용 등' : ''}
-                    </div>
-                </div>
-            `;
-        }
-
-        // 계산기 섹션
-        function toggleCalcOption(type) {
-            const checkbox = document.getElementById(`calc-opt-${type}`);
-            checkbox.checked = !checkbox.checked;
-            checkbox.closest('.option-item').classList.toggle('active', checkbox.checked);
-            updateCalc();
-        }
-
-        function selectCalcDiscount(rate) {
-            calcDiscount = rate;
-            document.querySelectorAll('.discount-btn.calc-discount').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.discount == rate);
+            paymentHistory.unshift({
+                id: Date.now(),
+                name: selectedStudent.name,
+                floor: currentFloor,
+                seatType: selectedStudent.seatType,
+                seatNumber: selectedStudent.seatNumber,
+                period: selectedPeriod,
+                amount: totalPrice,
+                discount: selectedDiscount,
+                locker: hasLocker,
+                mentoring: mentoringFee,
+                createdAt: today.toISOString()
             });
-            updateCalc();
+            saveData();
+            showToast('결제 내역이 저장되었습니다', 'success');
+            updateStats();
         }
 
-        function updateCalc() {
-            const seatType = document.getElementById('calc-seat-type').value;
-            const period = parseInt(document.getElementById('calc-period').value);
-            const day = parseInt(document.getElementById('calc-day').value) || 1;
-            const exclude = parseInt(document.getElementById('calc-exclude').value) || 0;
-            const hasLocker = document.getElementById('calc-opt-locker').checked;
-            const mentoringFee = parseInt(document.getElementById('calc-mentoring').value) || 0;
+        function renderPriceTable() {
+            const container = document.getElementById('price-table');
+            const prices = priceData[currentFloor];
+            let html = '';
+            for (const [type, p] of Object.entries(prices)) {
+                if (currentFloor === 8 && type === '지정석') continue;
+                html += `
+                    <div class="price-table-row"><span class="label">${type} 1개월</span><span class="value">${p[1].toLocaleString()}원</span></div>
+                    <div class="price-table-row"><span class="label">${type} 2개월</span><span class="value">${p[2].toLocaleString()}원</span></div>
+                    <div class="price-table-row"><span class="label">${type} 3개월</span><span class="value">${p[3].toLocaleString()}원</span></div>
+                `;
+            }
+            html += `<div class="price-table-row" style="border-top: 2px solid var(--gray-200); margin-top: 8px; padding-top: 12px;"><span class="label">🔐 사물함</span><span class="value">20,000원/월</span></div>`;
+            container.innerHTML = html;
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total').textContent = students[7].length + students[8].length;
+            document.getElementById('stat-floor7').textContent = students[7].length;
+            document.getElementById('stat-floor8').textContent = students[8].length;
             
-            const floor = seatType === '프리미엄' ? 7 : 8;
-            const prices = priceData[floor][seatType];
-            if (!prices) return;
+            const now = new Date();
+            const monthPayments = paymentHistory.filter(p => {
+                const d = new Date(p.createdAt);
+                return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+            });
+            document.getElementById('stat-payments').textContent = monthPayments.length;
             
-            const basePrice = prices[period];
-            const dailyRate = basePrice / 30;
-            const useDays = Math.max(0, 31 - day - exclude);
+            renderSeatChart(8, 'chart-floor8');
+            renderSeatChart(7, 'chart-floor7');
+        }
+
+        function renderSeatChart(floor, containerId) {
+            const container = document.getElementById(containerId);
+            const types = seatTypes[floor].filter(t => t !== '전체');
+            const max = Math.max(...types.map(t => students[floor].filter(s => s.seatType === t).length), 1);
             
-            let seatPrice;
-            if (day === 1 && exclude === 0) {
-                seatPrice = basePrice;
+            container.innerHTML = types.map(type => {
+                const count = students[floor].filter(s => s.seatType === type).length;
+                return `
+                    <div class="seat-chart-row">
+                        <span class="seat-chart-label">${type}</span>
+                        <div class="seat-chart-bar-bg">
+                            <div class="seat-chart-bar ${type}" style="width: ${(count/max)*100}%"></div>
+                        </div>
+                        <span class="seat-chart-count">${count}명</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history-list');
+            if (!paymentHistory.length) {
+                container.innerHTML = '<div class="empty-state"><p>결제 내역이 없습니다</p></div>';
+                return;
+            }
+            container.innerHTML = paymentHistory.map((item, i) => {
+                const d = new Date(item.createdAt);
+                let extras = [];
+                if (item.discount) extras.push(`${item.discount}%할인`);
+                if (item.locker) extras.push('사물함');
+                if (item.mentoring) extras.push('멘토링');
+                const extrasText = extras.length ? ` (${extras.join(', ')})` : '';
+                return `
+                    <div class="history-item">
+                        <div class="history-info">
+                            <h4>${item.name} (${item.floor}층)</h4>
+                            <p>${item.seatType} ${item.seatNumber}번 · ${item.period}개월${extrasText} · ${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}</p>
+                        </div>
+                        <div style="display:flex;align-items:center;">
+                            <span class="history-amount">₩${item.amount.toLocaleString()}</span>
+                            <button class="history-delete" onclick="deleteHistory(${i})">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function deleteHistory(index) {
+            paymentHistory.splice(index, 1);
+            saveData();
+            renderHistory();
+            updateStats();
+            showToast('내역이 삭제되었습니다');
+        }
+
+        function exportHistory() {
+            if (!paymentHistory.length) { showToast('내보낼 내역이 없습니다', 'error'); return; }
+            let csv = '이름,층,좌석유형,좌석번호,기간(개월),금액,할인율,사물함,멘토링,결제일\n';
+            paymentHistory.forEach(item => {
+                const d = new Date(item.createdAt);
+                csv += `${item.name},${item.floor}층,${item.seatType},${item.seatNumber},${item.period},${item.amount},${item.discount||0}%,${item.locker?'O':'X'},${item.mentoring||0},${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}\n`;
+            });
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `김엄마독서실_결제내역_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+            showToast('CSV 파일이 다운로드됩니다', 'success');
+        }
+
+        function openAddModal() {
+            document.getElementById('modal-title').textContent = '신규 학생 추가';
+            document.getElementById('modal-submit').textContent = '추가하기';
+            document.getElementById('edit-index').value = '';
+            document.getElementById('modal-name').value = '';
+            document.getElementById('modal-floor').value = currentFloor;
+            document.getElementById('modal-seat-number').value = '';
+            document.getElementById('modal-student-phone').value = '';
+            document.getElementById('modal-parent-phone').value = '';
+            updateModalSeatTypes();
+            document.getElementById('student-modal').classList.add('active');
+        }
+
+        function openEditModal(index) {
+            const s = students[currentFloor][index];
+            document.getElementById('modal-title').textContent = '학생 정보 수정';
+            document.getElementById('modal-submit').textContent = '저장하기';
+            document.getElementById('edit-index').value = index;
+            document.getElementById('modal-name').value = s.name;
+            document.getElementById('modal-floor').value = currentFloor;
+            document.getElementById('modal-seat-number').value = s.seatNumber;
+            document.getElementById('modal-student-phone').value = s.phone;
+            document.getElementById('modal-parent-phone').value = s.parentPhone;
+            updateModalSeatTypes();
+            document.getElementById('modal-seat-type').value = s.seatType;
+            document.getElementById('student-modal').classList.add('active');
+        }
+
+        function closeStudentModal() { document.getElementById('student-modal').classList.remove('active'); }
+
+        function updateModalSeatTypes() {
+            const floor = parseInt(document.getElementById('modal-floor').value);
+            const sel = document.getElementById('modal-seat-type');
+            sel.innerHTML = seatTypes[floor].filter(t => t !== '전체').map(t => `<option value="${t}">${t}</option>`).join('');
+        }
+
+        function saveStudent() {
+            const editIdx = document.getElementById('edit-index').value;
+            const name = document.getElementById('modal-name').value.trim();
+            const floor = parseInt(document.getElementById('modal-floor').value);
+            const seatType = document.getElementById('modal-seat-type').value;
+            const seatNumber = document.getElementById('modal-seat-number').value.trim() || '미정';
+            const phone = document.getElementById('modal-student-phone').value.trim();
+            const parentPhone = document.getElementById('modal-parent-phone').value.trim();
+            
+            if (!name) { showToast('학생 이름을 입력해주세요', 'error'); return; }
+            
+            const data = { name, phone, parentPhone, seatType, seatNumber };
+            
+            if (editIdx !== '') {
+                students[currentFloor][parseInt(editIdx)] = data;
+                showToast('학생 정보가 수정되었습니다', 'success');
             } else {
-                seatPrice = Math.round(dailyRate * useDays);
+                students[floor].push(data);
+                showToast(`${name} 학생이 추가되었습니다`, 'success');
             }
             
-            const discountedSeatPrice = Math.round(seatPrice * (1 - calcDiscount / 100));
-            const lockerFee = hasLocker ? LOCKER_FEE * period : 0;
-            const totalAmount = discountedSeatPrice + lockerFee + mentoringFee;
-            
-            document.getElementById('calc-result').innerHTML = `
-                <div class="verify-details">
-                    <div class="verify-row">
-                        <span class="label">좌석 유형</span>
-                        <span class="value">${seatType} (${floor}층)</span>
-                    </div>
-                    <div class="verify-row">
-                        <span class="label">기본 요금 (${period}개월)</span>
-                        <span class="value">${basePrice.toLocaleString()}원</span>
-                    </div>
-                    <div class="verify-row">
-                        <span class="label">일일 단가</span>
-                        <span class="value">${Math.round(dailyRate).toLocaleString()}원</span>
-                    </div>
-                    <div class="verify-row">
-                        <span class="label">이용일수</span>
-                        <span class="value">${useDays}일</span>
-                    </div>
-                    <div class="verify-row">
-                        <span class="label">일할 계산</span>
-                        <span class="value">${seatPrice.toLocaleString()}원</span>
-                    </div>
-                    ${calcDiscount > 0 ? `
-                    <div class="verify-row">
-                        <span class="label">할인 (${calcDiscount}%)</span>
-                        <span class="value discount">-${(seatPrice - discountedSeatPrice).toLocaleString()}원</span>
-                    </div>
-                    ` : ''}
-                    ${hasLocker ? `
-                    <div class="verify-row">
-                        <span class="label">🔐 사물함 (${period}개월)</span>
-                        <span class="value add">+${lockerFee.toLocaleString()}원</span>
-                    </div>
-                    ` : ''}
-                    ${mentoringFee > 0 ? `
-                    <div class="verify-row">
-                        <span class="label">📝 멘토링</span>
-                        <span class="value add">+${mentoringFee.toLocaleString()}원</span>
-                    </div>
-                    ` : ''}
-                    <div class="verify-row" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); margin: 12px -16px -16px; padding: 16px; border-radius: 0 0 12px 12px;">
-                        <span class="label" style="color: rgba(255,255,255,0.8); font-size: 1rem;"><strong>최종 금액</strong></span>
-                        <span class="value" style="color: white; font-size: 1.25rem;"><strong>₩${totalAmount.toLocaleString()}</strong></span>
-                    </div>
-                </div>
-            `;
+            saveData();
+            updateCounts();
+            renderStudentList();
+            updateStats();
+            closeStudentModal();
+        }
+
+        function openDeleteModal(index, name) {
+            deleteTarget = { index, floor: currentFloor };
+            document.getElementById('delete-message').textContent = `"${name}" 학생을 정말 삭제하시겠습니까?`;
+            document.getElementById('delete-modal').classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.remove('active');
+            deleteTarget = null;
+        }
+
+        function confirmDelete() {
+            if (!deleteTarget) return;
+            students[deleteTarget.floor].splice(deleteTarget.index, 1);
+            saveData();
+            updateCounts();
+            renderStudentList();
+            updateStats();
+            closeDeleteModal();
+            showToast('학생이 삭제되었습니다');
         }
 
         function toggleTheme() {
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
             localStorage.setItem('kimomma_theme', isDark ? '' : 'dark');
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            document.getElementById('theme-icon').innerHTML = isDark 
+                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>'
+                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>';
+        }
+
+        function showToast(message, type = '') {
+            const toast = document.getElementById('toast');
+            toast.className = 'toast';
+            if (type) toast.classList.add(type);
+            document.getElementById('toast-message').textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
         }
     </script>
 </body>
