@@ -3,1135 +3,1776 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>김엄마독서실 결제 계산기</title>
+    <title>김엄마독서실 결제 계산기 v2</title>
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="김엄마독서실">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #2563eb;
             --primary-dark: #1d4ed8;
-            --secondary: #f59e0b;
+            --primary-light: #dbeafe;
+            --secondary: #f97316;
+            --secondary-light: #ffedd5;
             --success: #10b981;
+            --success-light: #d1fae5;
             --danger: #ef4444;
-            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --card-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --danger-light: #fee2e2;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --floor-7: #8b5cf6;
+            --floor-7-light: #ede9fe;
+            --floor-8: #0891b2;
+            --floor-8-light: #cffafe;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --radius-lg: 16px;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        [data-theme="dark"] {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --primary-light: #1e3a5f;
+            --gray-50: #111827;
+            --gray-100: #1f2937;
+            --gray-200: #374151;
+            --gray-300: #4b5563;
+            --gray-400: #6b7280;
+            --gray-500: #9ca3af;
+            --gray-600: #d1d5db;
+            --gray-700: #e5e7eb;
+            --gray-800: #f3f4f6;
+            --gray-900: #f9fafb;
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%);
             min-height: 100vh;
-            padding: 20px;
+            color: var(--gray-800);
+            line-height: 1.6;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        [data-theme="dark"] body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 480px;
             margin: 0 auto;
+            padding: 16px;
+            padding-bottom: 100px;
         }
 
-        header {
+        .header {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 30px;
-            background: var(--bg-gradient);
-            border-radius: 20px;
-            color: white;
-            box-shadow: var(--card-shadow);
+            padding: 24px 0;
+            margin-bottom: 16px;
+            position: relative;
         }
 
-        header h1 {
-            font-size: 2.2rem;
+        .header h1 {
+            font-size: 1.75rem;
             font-weight: 700;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--floor-7) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
         }
 
-        header p {
-            font-size: 1rem;
-            opacity: 0.9;
-        }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-        }
-
-        @media (max-width: 900px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: var(--card-shadow);
-            transition: var(--transition);
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
-        }
-
-        .card-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .card-title::before {
-            content: '';
-            width: 4px;
-            height: 24px;
-            background: var(--bg-gradient);
-            border-radius: 2px;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        .form-group label {
-            display: block;
+        .header .version {
+            font-size: 0.875rem;
+            color: var(--gray-500);
             font-weight: 500;
-            color: #475569;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
         }
 
-        .form-group select,
-        .form-group input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-family: inherit;
-            transition: var(--transition);
-            background: #f8fafc;
-        }
-
-        .form-group select:focus,
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: white;
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .checkbox-group {
+        .header-actions {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
             display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 10px;
+            gap: 8px;
         }
 
-        .checkbox-item {
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 10px 16px;
-            background: #f1f5f9;
-            border-radius: 8px;
+            justify-content: center;
+            color: var(--gray-600);
+            box-shadow: var(--shadow);
+            transition: all 0.2s ease;
+        }
+
+        .icon-btn:hover {
+            background: var(--gray-100);
+            transform: scale(1.05);
+        }
+
+        [data-theme="dark"] .icon-btn {
+            background: var(--gray-100);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            background: white;
+            padding: 4px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        [data-theme="dark"] .nav-tabs { background: var(--gray-100); }
+
+        .nav-tab {
+            flex: 1;
+            padding: 12px 8px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: var(--transition);
-            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            background: transparent;
+            color: var(--gray-500);
         }
 
-        .checkbox-item:hover {
-            background: #e2e8f0;
+        .nav-tab.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: var(--shadow-md);
         }
 
-        .checkbox-item.active {
-            background: #dbeafe;
-            border-color: var(--primary);
+        .nav-tab:not(.active):hover { background: var(--gray-100); }
+
+        .section { display: none; }
+        .section.active { display: block; }
+
+        .floor-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            background: white;
+            padding: 6px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
         }
 
-        .checkbox-item input {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--primary);
-        }
+        [data-theme="dark"] .floor-tabs { background: var(--gray-100); }
 
-        .btn {
-            display: inline-flex;
+        .floor-tab {
+            flex: 1;
+            padding: 14px 16px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 14px 28px;
-            border: none;
-            border-radius: 10px;
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+
+        .floor-tab.floor-8.active {
+            background: var(--floor-8);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .floor-tab.floor-7.active {
+            background: var(--floor-7);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .floor-tab .count {
+            background: rgba(255,255,255,0.3);
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+
+        .floor-tab:not(.active) .count { background: var(--gray-200); }
+
+        .card {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        [data-theme="dark"] .card { background: var(--gray-100); }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header h2 {
             font-size: 1rem;
             font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            font-family: inherit;
-        }
-
-        .btn-primary {
-            background: var(--bg-gradient);
-            color: white;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-secondary {
-            background: #f1f5f9;
-            color: #475569;
-        }
-
-        .btn-secondary:hover {
-            background: #e2e8f0;
-        }
-
-        .result-section {
-            margin-top: 25px;
-            padding-top: 25px;
-            border-top: 2px dashed #e2e8f0;
-        }
-
-        .result-item {
+            color: var(--gray-800);
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 14px 0;
-            border-bottom: 1px solid #f1f5f9;
+            gap: 8px;
         }
 
-        .result-item:last-child {
-            border-bottom: none;
-        }
+        .card-header .icon { width: 20px; height: 20px; }
+        .card-body { padding: 16px 20px; }
 
-        .result-label {
-            color: #64748b;
-            font-size: 0.95rem;
-        }
-
-        .result-value {
-            font-weight: 600;
-            color: #1e293b;
-            font-size: 1.1rem;
-        }
-
-        .result-total {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            margin: 20px -25px -25px;
-            padding: 25px;
-            border-radius: 0 0 16px 16px;
-        }
-
-        .result-total .result-item {
-            border-bottom: none;
-            padding: 0;
-        }
-
-        .result-total .result-label {
-            color: rgba(255,255,255,0.9);
-            font-size: 1.1rem;
-        }
-
-        .result-total .result-value {
-            color: white;
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-
-        .price-table {
-            margin-top: 20px;
-        }
-
-        .price-table-header {
-            display: grid;
-            grid-template-columns: 60px repeat(4, 1fr);
-            gap: 5px;
-            background: #f1f5f9;
-            padding: 12px 10px;
-            border-radius: 10px 10px 0 0;
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: #475569;
-        }
-
-        .price-table-body {
-            max-height: 400px;
-            overflow-y: auto;
-            border: 1px solid #e2e8f0;
-            border-top: none;
-            border-radius: 0 0 10px 10px;
-        }
-
-        .price-table-row {
-            display: grid;
-            grid-template-columns: 60px repeat(4, 1fr);
-            gap: 5px;
-            padding: 10px;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 0.9rem;
-            transition: var(--transition);
-            cursor: pointer;
-        }
-
-        .price-table-row:hover {
-            background: #f8fafc;
-        }
-
-        .price-table-row.selected {
-            background: #dbeafe;
-        }
-
-        .price-table-row > div {
-            text-align: center;
-        }
-
-        .price-table-row > div:first-child {
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .tab-container {
+        .seat-filter {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
         }
 
-        .tab {
-            padding: 10px 20px;
-            border: none;
-            background: #f1f5f9;
-            border-radius: 8px;
-            cursor: pointer;
+        .seat-filter-btn {
+            padding: 8px 14px;
+            border: 1px solid var(--gray-200);
+            border-radius: 20px;
+            background: white;
+            font-size: 0.875rem;
             font-weight: 500;
-            transition: var(--transition);
-            font-family: inherit;
-        }
-
-        .tab.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .tab:hover:not(.active) {
-            background: #e2e8f0;
-        }
-
-        .quick-calc {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .quick-btn {
-            padding: 15px 10px;
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            text-align: center;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.2s ease;
+            color: var(--gray-600);
         }
 
-        .quick-btn:hover {
+        [data-theme="dark"] .seat-filter-btn {
+            background: var(--gray-200);
+            border-color: var(--gray-300);
+        }
+
+        .seat-filter-btn:hover {
             border-color: var(--primary);
-            background: #dbeafe;
-        }
-
-        .quick-btn .day {
-            font-size: 1.5rem;
-            font-weight: 700;
             color: var(--primary);
         }
 
-        .quick-btn .label {
-            font-size: 0.75rem;
-            color: #64748b;
-            margin-top: 4px;
-        }
-
-        .copy-btn {
-            padding: 8px 16px;
-            background: #10b981;
+        .seat-filter-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
             color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: var(--transition);
         }
 
-        .copy-btn:hover {
-            background: #059669;
+        .search-box {
+            position: relative;
+            margin-bottom: 12px;
         }
 
-        .history-list {
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            font-size: 0.9375rem;
+            outline: none;
+            transition: all 0.2s ease;
+            background: white;
+            color: var(--gray-800);
+        }
+
+        [data-theme="dark"] .search-box input {
+            background: var(--gray-200);
+            border-color: var(--gray-300);
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .search-box .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: var(--gray-400);
+        }
+
+        .student-list {
             max-height: 300px;
             overflow-y: auto;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
         }
 
-        .history-item {
-            padding: 15px;
-            background: #f8fafc;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            border-left: 4px solid var(--primary);
+        .student-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--gray-100);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .history-item .info {
-            font-size: 0.9rem;
-            color: #475569;
-            margin-bottom: 5px;
+        .student-item:last-child { border-bottom: none; }
+        .student-item:hover { background: var(--gray-50); }
+        .student-item.selected { background: var(--primary-light); }
+
+        .student-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
 
-        .history-item .amount {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #1e293b;
+        .student-name {
+            font-weight: 600;
+            font-size: 0.9375rem;
+            color: var(--gray-800);
         }
 
-        .note-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-family: inherit;
-            resize: vertical;
-            min-height: 80px;
+        .student-detail {
+            font-size: 0.8125rem;
+            color: var(--gray-500);
         }
 
-        .badge {
-            display: inline-block;
+        .student-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .student-action-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: var(--gray-100);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-500);
+            transition: all 0.2s ease;
+        }
+
+        .student-action-btn:hover { background: var(--gray-200); }
+        .student-action-btn.edit:hover { background: var(--primary-light); color: var(--primary); }
+        .student-action-btn.delete:hover { background: var(--danger-light); color: var(--danger); }
+
+        .seat-badge {
             padding: 4px 10px;
             border-radius: 20px;
             font-size: 0.75rem;
             font-weight: 600;
+            margin-right: 8px;
         }
 
-        .badge-vacation {
-            background: #fef3c7;
-            color: #d97706;
+        .seat-badge.자유석 { background: #fef3c7; color: #92400e; }
+        .seat-badge.지정석 { background: #dbeafe; color: #1e40af; }
+        .seat-badge.지정석_여 { background: #fce7f3; color: #9d174d; }
+        .seat-badge.지정석_남 { background: #dbeafe; color: #1e40af; }
+        .seat-badge.칸막이 { background: #d1fae5; color: #065f46; }
+        .seat-badge.프리미엄 { background: #fef3c7; color: #92400e; }
+
+        .selected-student-card {
+            background: linear-gradient(135deg, var(--primary-light) 0%, #eff6ff 100%);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid var(--primary);
         }
 
-        .badge-regular {
-            background: #dbeafe;
-            color: #2563eb;
+        [data-theme="dark"] .selected-student-card {
+            background: linear-gradient(135deg, var(--primary-light) 0%, #1e3a5f 100%);
         }
 
-        .tooltip {
-            position: relative;
+        .selected-student-card .name {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
         }
 
-        .info-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 20px;
-            height: 20px;
-            background: #e2e8f0;
-            border-radius: 50%;
-            font-size: 0.75rem;
-            color: #64748b;
-            cursor: help;
-            margin-left: 5px;
-        }
-
-        .section-divider {
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
-            margin: 20px 0;
-        }
-
-        /* 추가 금액 입력 섹션 스타일 */
-        .additional-section {
-            background: #fefce8;
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 15px;
-            border: 1px solid #fef08a;
-        }
-
-        .additional-section h4 {
-            color: #a16207;
-            margin-bottom: 10px;
-            font-size: 0.95rem;
-        }
-
-        .additional-grid {
+        .selected-student-card .details {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 8px;
+            font-size: 0.875rem;
+            color: var(--gray-600);
         }
 
-        .additional-item {
+        .period-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .period-btn {
+            padding: 12px 8px;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            background: white;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            color: var(--gray-700);
+        }
+
+        [data-theme="dark"] .period-btn {
+            background: var(--gray-200);
+            border-color: var(--gray-300);
+        }
+
+        .period-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .period-btn.selected {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .period-btn .weeks {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: 2px;
+        }
+
+        .period-btn.selected .weeks { color: rgba(255,255,255,0.8); }
+
+        .price-display {
+            background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-900) 100%);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            text-align: center;
+            color: white;
+            margin-bottom: 16px;
+        }
+
+        .price-label {
+            font-size: 0.875rem;
+            color: var(--gray-400);
+            margin-bottom: 8px;
+        }
+
+        .price-amount {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        .price-breakdown {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--gray-700);
+            font-size: 0.875rem;
+            color: var(--gray-400);
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 16px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .action-btn.primary { background: var(--primary); color: white; }
+        .action-btn.primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+        .action-btn.kakao { background: #FEE500; color: #191919; }
+        .action-btn.kakao:hover { background: #E6CF00; transform: translateY(-1px); }
+        .action-btn.success { background: var(--success); color: white; }
+        .action-btn.success:hover { background: #059669; transform: translateY(-1px); }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+        .add-student-btn {
+            width: 100%;
+            padding: 12px;
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--radius);
+            background: transparent;
+            color: var(--gray-500);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .add-student-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 16px;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: white;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+
+        [data-theme="dark"] .modal { background: var(--gray-100); }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .modal-close {
+            width: 32px; height: 32px;
+            border: none;
+            background: var(--gray-100);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-500);
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover { background: var(--gray-200); color: var(--gray-700); }
+        .modal-body { padding: 20px; }
+
+        .form-group { margin-bottom: 16px; }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            font-size: 0.9375rem;
+            outline: none;
+            transition: all 0.2s ease;
+            background: white;
+            color: var(--gray-800);
+        }
+
+        [data-theme="dark"] .form-group input,
+        [data-theme="dark"] .form-group select {
+            background: var(--gray-200);
+            border-color: var(--gray-300);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-footer button {
+            flex: 1;
+            padding: 12px;
+            border-radius: var(--radius);
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel { background: var(--gray-100); border: none; color: var(--gray-600); }
+        .btn-cancel:hover { background: var(--gray-200); }
+        .btn-submit { background: var(--primary); border: none; color: white; }
+        .btn-submit:hover { background: var(--primary-dark); }
+        .btn-danger { background: var(--danger); border: none; color: white; }
+        .btn-danger:hover { background: #dc2626; }
+
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--gray-800);
+            color: white;
+            padding: 14px 24px;
+            border-radius: var(--radius);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1001;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .additional-item label {
-            font-size: 0.85rem;
-            color: #713f12;
-            min-width: 60px;
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray-500);
         }
 
-        .additional-item input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #fde047;
-            border-radius: 6px;
-            font-size: 0.9rem;
+        .empty-state .icon {
+            width: 48px; height: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
         }
 
-        /* 결제 방식 선택 */
-        .payment-method {
+        .price-table { margin-top: 8px; }
+
+        .price-table-row {
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--gray-100);
+            font-size: 0.875rem;
         }
 
-        .payment-btn {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
+        .price-table-row:last-child { border-bottom: none; }
+        .price-table-row .label { color: var(--gray-600); }
+        .price-table-row .value { font-weight: 600; color: var(--gray-800); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
             background: white;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: 500;
-            transition: var(--transition);
+            border-radius: var(--radius);
+            padding: 16px;
+            text-align: center;
+            box-shadow: var(--shadow);
         }
 
-        .payment-btn.active {
-            border-color: var(--primary);
-            background: #dbeafe;
+        [data-theme="dark"] .stat-card { background: var(--gray-100); }
+
+        .stat-card .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
             color: var(--primary);
         }
 
-        .payment-btn:hover:not(.active) {
-            border-color: #cbd5e1;
+        .stat-card .stat-label {
+            font-size: 0.8125rem;
+            color: var(--gray-500);
+            margin-top: 4px;
         }
 
-        /* 안내 메시지 */
-        .info-box {
-            background: #f0f9ff;
-            border: 1px solid #bae6fd;
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 15px;
+        .stat-card.floor-8 .stat-value { color: var(--floor-8); }
+        .stat-card.floor-7 .stat-value { color: var(--floor-7); }
+
+        .seat-chart { margin-top: 16px; }
+
+        .seat-chart-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
         }
 
-        .info-box p {
-            font-size: 0.85rem;
-            color: #0369a1;
-            line-height: 1.6;
+        .seat-chart-label {
+            width: 80px;
+            font-size: 0.8125rem;
+            color: var(--gray-600);
         }
 
-        /* 방학 기간 설정 */
-        .vacation-setting {
-            background: #fef3c7;
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 15px;
+        .seat-chart-bar-bg {
+            flex: 1;
+            height: 24px;
+            background: var(--gray-100);
+            border-radius: 12px;
+            overflow: hidden;
         }
 
-        .vacation-setting h4 {
-            color: #92400e;
-            margin-bottom: 10px;
-            font-size: 0.95rem;
+        .seat-chart-bar {
+            height: 100%;
+            border-radius: 12px;
+            transition: width 0.5s ease;
         }
 
-        /* 애니메이션 */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .seat-chart-bar.자유석 { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+        .seat-chart-bar.지정석_여 { background: linear-gradient(90deg, #ec4899, #db2777); }
+        .seat-chart-bar.지정석_남 { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+        .seat-chart-bar.칸막이 { background: linear-gradient(90deg, #10b981, #059669); }
+        .seat-chart-bar.프리미엄 { background: linear-gradient(90deg, #f59e0b, #d97706); }
+
+        .seat-chart-count {
+            width: 50px;
+            text-align: right;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-700);
         }
 
-        .fade-in {
-            animation: fadeIn 0.3s ease-out;
+        .history-item {
+            padding: 16px;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        /* 반응형 */
-        @media (max-width: 600px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .quick-calc {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            header h1 {
-                font-size: 1.6rem;
-            }
-            
-            .additional-grid {
-                grid-template-columns: 1fr;
-            }
+        .history-item:last-child { border-bottom: none; }
+
+        .history-info h4 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 4px;
         }
+
+        .history-info p {
+            font-size: 0.8125rem;
+            color: var(--gray-500);
+        }
+
+        .history-amount {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .history-delete {
+            margin-left: 12px;
+            width: 28px; height: 28px;
+            border: none;
+            background: var(--gray-100);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-400);
+            transition: all 0.2s ease;
+        }
+
+        .history-delete:hover { background: var(--danger-light); color: var(--danger); }
+
+        .recent-students {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .recent-student-chip {
+            flex-shrink: 0;
+            padding: 8px 14px;
+            background: var(--primary-light);
+            border: 1px solid var(--primary);
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .recent-student-chip:hover { background: var(--primary); color: white; }
+
+        .student-list::-webkit-scrollbar,
+        .recent-students::-webkit-scrollbar { width: 6px; height: 6px; }
+
+        .student-list::-webkit-scrollbar-track,
+        .recent-students::-webkit-scrollbar-track { background: var(--gray-100); border-radius: 3px; }
+
+        .student-list::-webkit-scrollbar-thumb,
+        .recent-students::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>🏫 김엄마관리형독서실</h1>
-            <p>결제 금액 자동 계산기 (12월 기준)</p>
-        </header>
-
-        <div class="main-grid">
-            <!-- 왼쪽: 계산 입력 -->
-            <div class="card">
-                <h2 class="card-title">결제 계산</h2>
-                
-                <div class="form-group">
-                    <label>좌석 유형 선택</label>
-                    <div class="tab-container">
-                        <button class="tab active" onclick="selectSeatType('자유석')">자유석</button>
-                        <button class="tab" onclick="selectSeatType('지정석')">지정석</button>
-                        <button class="tab" onclick="selectSeatType('칸막이')">칸막이</button>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>등원일 (결제 시작일)</label>
-                        <select id="startDay" onchange="calculate()">
-                            <option value="">선택하세요</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>결제 기간</label>
-                        <select id="period" onchange="calculate()">
-                            <option value="1">1개월</option>
-                            <option value="2">2개월</option>
-                            <option value="3">3개월</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group" id="vacationTypeGroup" style="display:none;">
-                    <label>방학 요금 타입 (19일 이후 적용)</label>
-                    <div class="payment-method">
-                        <button class="payment-btn active" onclick="selectVacationType('A')" id="vacaA">A타입 (저렴)</button>
-                        <button class="payment-btn" onclick="selectVacationType('B')" id="vacaB">B타입 (일반)</button>
-                    </div>
-                </div>
-
-                <div class="section-divider"></div>
-
-                <div class="form-group">
-                    <label>결제 방식</label>
-                    <div class="payment-method">
-                        <button class="payment-btn active" onclick="selectPayment('card')" id="payCard">💳 카드</button>
-                        <button class="payment-btn" onclick="selectPayment('cash')" id="payCash">💵 현금</button>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>할인 적용</label>
-                    <div class="checkbox-group">
-                        <label class="checkbox-item" onclick="toggleCheckbox(this)">
-                            <input type="checkbox" id="discount10" onchange="calculate()">
-                            10% 할인
-                        </label>
-                        <label class="checkbox-item" onclick="toggleCheckbox(this)">
-                            <input type="checkbox" id="discount20" onchange="calculate()">
-                            20% 할인
-                        </label>
-                    </div>
-                </div>
-
-                <div class="additional-section">
-                    <h4>➕ 추가 금액</h4>
-                    <div class="additional-grid">
-                        <div class="additional-item">
-                            <label>멘토비</label>
-                            <input type="number" id="mentorFee" value="0" onchange="calculate()" placeholder="0">
-                        </div>
-                        <div class="additional-item">
-                            <label>사물함</label>
-                            <input type="number" id="lockerFee" value="0" onchange="calculate()" placeholder="0">
-                        </div>
-                        <div class="additional-item">
-                            <label>자리이동</label>
-                            <input type="number" id="moveFee" value="0" onchange="calculate()" placeholder="0">
-                        </div>
-                        <div class="additional-item">
-                            <label>기타</label>
-                            <input type="number" id="otherFee" value="0" onchange="calculate()" placeholder="0">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-top: 15px;">
-                    <label>환불 금액 (차감)</label>
-                    <input type="number" id="refundAmount" value="0" onchange="calculate()" placeholder="0">
-                </div>
-
-                <button class="btn btn-primary" onclick="calculate()">
-                    🧮 계산하기
+        <div class="header">
+            <h1>📚 김엄마독서실</h1>
+            <div class="version">결제 계산기 v2</div>
+            <div class="header-actions">
+                <button class="icon-btn" onclick="toggleTheme()" title="다크모드">
+                    <svg id="theme-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                    </svg>
                 </button>
+            </div>
+        </div>
 
-                <div class="result-section" id="resultSection" style="display:none;">
-                    <div class="result-item">
-                        <span class="result-label">기본 요금</span>
-                        <span class="result-value" id="basePrice">0원</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">할인 금액</span>
-                        <span class="result-value" id="discountAmount" style="color: #ef4444;">-0원</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">추가 금액</span>
-                        <span class="result-value" id="additionalAmount" style="color: #10b981;">+0원</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">환불 금액</span>
-                        <span class="result-value" id="refundDisplay" style="color: #ef4444;">-0원</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">청구 금액 (할인 후)</span>
-                        <span class="result-value" id="chargeAmount">0원</span>
-                    </div>
-                    <div class="result-total">
-                        <div class="result-item">
-                            <span class="result-label">💰 실 결제금액</span>
-                            <span class="result-value" id="finalAmount">0원</span>
-                        </div>
-                    </div>
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchSection('calculator')">💰 계산기</button>
+            <button class="nav-tab" onclick="switchSection('stats')">📊 통계</button>
+            <button class="nav-tab" onclick="switchSection('history')">📋 내역</button>
+        </div>
+
+        <!-- Calculator Section -->
+        <div class="section active" id="section-calculator">
+            <div class="floor-tabs">
+                <button class="floor-tab floor-8 active" onclick="selectFloor(8)">
+                    <span>8층</span>
+                    <span class="count" id="floor8-count">115명</span>
+                </button>
+                <button class="floor-tab floor-7" onclick="selectFloor(7)">
+                    <span>7층</span>
+                    <span class="count" id="floor7-count">46명</span>
+                </button>
+            </div>
+
+            <div class="recent-students" id="recent-students" style="display: none;"></div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        학생 선택
+                    </h2>
                 </div>
-
-                <div class="info-box">
-                    <p>💡 <strong>카드 결제</strong> 시 약 1.1% 수수료가 적용됩니다.<br>
-                    📌 <strong>방학 기간</strong> (19일 이후)에는 A/B 타입 요금이 적용됩니다.</p>
+                <div class="card-body">
+                    <div class="seat-filter" id="seat-filter"></div>
+                    <div class="search-box">
+                        <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <input type="text" id="student-search" placeholder="학생 이름 검색..." oninput="filterStudents()">
+                    </div>
+                    <div class="student-list" id="student-list"></div>
+                    <button class="add-student-btn" onclick="openAddModal()">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        신규 학생 추가
+                    </button>
                 </div>
             </div>
 
-            <!-- 오른쪽: 요금표 -->
+            <div class="card" id="calculation-card" style="display: none;">
+                <div class="card-header">
+                    <h2>
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        </svg>
+                        결제 계산
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="selected-student-card" id="selected-student-info"></div>
+                    <div class="form-group">
+                        <label>이용 기간</label>
+                        <div class="period-grid">
+                            <button class="period-btn" onclick="selectPeriod(1)" data-period="1">1개월<span class="weeks">4주</span></button>
+                            <button class="period-btn" onclick="selectPeriod(2)" data-period="2">2개월<span class="weeks">8주</span></button>
+                            <button class="period-btn" onclick="selectPeriod(3)" data-period="3">3개월<span class="weeks">12주</span></button>
+                        </div>
+                    </div>
+                    <div class="price-display">
+                        <div class="price-label">결제 금액</div>
+                        <div class="price-amount" id="total-price">₩0</div>
+                        <div class="price-breakdown" id="price-breakdown"></div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn primary" id="copy-btn" onclick="copyPrice()" disabled>
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+                            </svg>
+                            금액 복사
+                        </button>
+                        <button class="action-btn kakao" id="kakao-btn" onclick="copyKakaoMessage()" disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 3C6.48 3 2 6.58 2 11c0 2.82 1.86 5.29 4.65 6.71-.15.53-.54 1.92-.62 2.22-.1.37.14.37.29.27.12-.08 1.89-1.28 2.65-1.8.67.1 1.36.15 2.03.15 5.52 0 10-3.58 10-8C22 6.58 17.52 3 12 3z"/>
+                            </svg>
+                            카톡 메시지
+                        </button>
+                    </div>
+                    <button class="action-btn success" id="save-btn" onclick="savePayment()" disabled style="margin-top: 12px; width: 100%;">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        결제 내역 저장
+                    </button>
+                </div>
+            </div>
+
             <div class="card">
-                <h2 class="card-title">12월 날짜별 요금표</h2>
-                
-                <div class="tab-container">
-                    <button class="tab active" onclick="showPriceTab('regular')" id="tabRegular">정규 요금</button>
-                    <button class="tab" onclick="showPriceTab('vacation')" id="tabVacation">방학 요금</button>
+                <div class="card-header">
+                    <h2>
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <span id="price-table-title">8층 요금표</span>
+                    </h2>
                 </div>
-
-                <div id="regularPriceTable" class="price-table">
-                    <div class="price-table-header">
-                        <div>일</div>
-                        <div>자유석</div>
-                        <div>지정석</div>
-                        <div>칸막이</div>
-                        <div></div>
-                    </div>
-                    <div class="price-table-body" id="priceTableBody">
-                        <!-- 동적 생성 -->
-                    </div>
+                <div class="card-body">
+                    <div class="price-table" id="price-table"></div>
                 </div>
+            </div>
+        </div>
 
-                <div id="vacationPriceTable" class="price-table" style="display:none;">
-                    <div class="price-table-header">
-                        <div>일</div>
-                        <div>자유A</div>
-                        <div>자유B</div>
-                        <div>지정석</div>
-                        <div>칸막이</div>
-                    </div>
-                    <div class="price-table-body" id="vacationTableBody">
-                        <!-- 동적 생성 -->
-                    </div>
+        <!-- Stats Section -->
+        <div class="section" id="section-stats">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-total">161</div>
+                    <div class="stat-label">전체 학생</div>
                 </div>
-
-                <div class="section-divider"></div>
-
-                <h3 style="font-size: 1rem; color: #475569; margin-bottom: 15px;">⚡ 빠른 계산 (등원일 선택)</h3>
-                <div class="quick-calc" id="quickCalc">
-                    <!-- 동적 생성 -->
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-payments">0</div>
+                    <div class="stat-label">이번 달 결제</div>
                 </div>
+                <div class="stat-card floor-8">
+                    <div class="stat-value" id="stat-floor8">115</div>
+                    <div class="stat-label">8층 학생</div>
+                </div>
+                <div class="stat-card floor-7">
+                    <div class="stat-value" id="stat-floor7">46</div>
+                    <div class="stat-label">7층 학생</div>
+                </div>
+            </div>
 
-                <div class="section-divider"></div>
+            <div class="card">
+                <div class="card-header"><h2>📊 8층 좌석 현황</h2></div>
+                <div class="card-body"><div class="seat-chart" id="chart-floor8"></div></div>
+            </div>
 
-                <h3 style="font-size: 1rem; color: #475569; margin-bottom: 15px;">📝 계산 기록</h3>
-                <div class="history-list" id="historyList">
-                    <p style="color: #94a3b8; font-size: 0.9rem; text-align: center; padding: 20px;">
-                        계산 기록이 없습니다
-                    </p>
+            <div class="card">
+                <div class="card-header"><h2>📊 7층 좌석 현황</h2></div>
+                <div class="card-body"><div class="seat-chart" id="chart-floor7"></div></div>
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div class="section" id="section-history">
+            <div class="card">
+                <div class="card-header">
+                    <h2>📋 결제 내역</h2>
+                    <button class="icon-btn" onclick="exportHistory()" title="내보내기">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div id="history-list"></div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Add/Edit Modal -->
+    <div class="modal-overlay" id="student-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">신규 학생 추가</h3>
+                <button class="modal-close" onclick="closeStudentModal()">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-index">
+                <div class="form-group">
+                    <label>학생 이름 *</label>
+                    <input type="text" id="modal-name" placeholder="홍길동">
+                </div>
+                <div class="form-group">
+                    <label>층</label>
+                    <select id="modal-floor" onchange="updateModalSeatTypes()">
+                        <option value="8">8층</option>
+                        <option value="7">7층</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>좌석 유형 *</label>
+                    <select id="modal-seat-type"></select>
+                </div>
+                <div class="form-group">
+                    <label>좌석 번호</label>
+                    <input type="text" id="modal-seat-number" placeholder="예: 101">
+                </div>
+                <div class="form-group">
+                    <label>학생 전화번호</label>
+                    <input type="tel" id="modal-student-phone" placeholder="010-0000-0000">
+                </div>
+                <div class="form-group">
+                    <label>학부모 전화번호</label>
+                    <input type="tel" id="modal-parent-phone" placeholder="010-0000-0000">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeStudentModal()">취소</button>
+                <button class="btn-submit" id="modal-submit" onclick="saveStudent()">추가하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>학생 삭제</h3>
+                <button class="modal-close" onclick="closeDeleteModal()">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="delete-message">정말 삭제하시겠습니까?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeDeleteModal()">취소</button>
+                <button class="btn-danger" onclick="confirmDelete()">삭제</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+        <span id="toast-message">복사되었습니다</span>
+    </div>
+
     <script>
-        // 정규 요금표 (1~31일)
-        const regularPrices = {
-            1: {free: 390000, desk: 490000, cubicle: 555000},
-            2: {free: 377000, desk: 475600, cubicle: 536500},
-            3: {free: 364000, desk: 459200, cubicle: 518000},
-            4: {free: 351000, desk: 442800, cubicle: 499500},
-            5: {free: 338000, desk: 426400, cubicle: 481000},
-            6: {free: 325000, desk: 410000, cubicle: 462500},
-            7: {free: 312000, desk: 393600, cubicle: 444000},
-            8: {free: 299000, desk: 377200, cubicle: 425500},
-            9: {free: 286000, desk: 360800, cubicle: 407000},
-            10: {free: 273000, desk: 344400, cubicle: 388500},
-            11: {free: 260000, desk: 328000, cubicle: 370000},
-            12: {free: 247000, desk: 311600, cubicle: 351500},
-            13: {free: 234000, desk: 295200, cubicle: 333000},
-            14: {free: 221000, desk: 278800, cubicle: 314500},
-            15: {free: 221000, desk: 278800, cubicle: 314500},
-            16: {free: 208000, desk: 262400, cubicle: 296000},
-            17: {free: 195000, desk: 246000, cubicle: 277500},
-            18: {free: 182000, desk: 229600, cubicle: 259000},
-            19: {free: 169000, desk: 213200, cubicle: 240500},
-            20: {free: 156000, desk: 196800, cubicle: 222000},
-            21: {free: 143000, desk: 180400, cubicle: 203500},
-            22: {free: 130000, desk: 164000, cubicle: 185000},
-            23: {free: 117000, desk: 147600, cubicle: 166500},
-            24: {free: 104000, desk: 131200, cubicle: 148000},
-            25: {free: 91000, desk: 114800, cubicle: 129500},
-            26: {free: 78000, desk: 98400, cubicle: 111000},
-            27: {free: 65000, desk: 82000, cubicle: 92500},
-            28: {free: 52000, desk: 65600, cubicle: 74000},
-            29: {free: 39000, desk: 49200, cubicle: 55500},
-            30: {free: 26000, desk: 32800, cubicle: 37000},
-            31: {free: 13000, desk: 16400, cubicle: 18500}
+        const priceData = {
+            8: {
+                '자유석': { 1: 220000, 2: 400000, 3: 540000 },
+                '지정석': { 1: 350000, 2: 640000, 3: 870000 },
+                '지정석_여': { 1: 350000, 2: 640000, 3: 870000 },
+                '지정석_남': { 1: 350000, 2: 640000, 3: 870000 },
+                '칸막이': { 1: 400000, 2: 730000, 3: 1000000 }
+            },
+            7: {
+                '프리미엄': { 1: 450000, 2: 820000, 3: 1120000 },
+                '지정석_여': { 1: 350000, 2: 640000, 3: 870000 },
+                '지정석_남': { 1: 350000, 2: 640000, 3: 870000 },
+                '칸막이': { 1: 400000, 2: 730000, 3: 1000000 }
+            }
         };
 
-        // 방학 요금표 (19~31일)
-        const vacationPrices = {
-            19: {freeA: 214500, freeB: 230000, desk: 273000, cubicle: 299000},
-            20: {freeA: 198000, freeB: 212400, desk: 252000, cubicle: 276000},
-            21: {freeA: 181500, freeB: 194700, desk: 231000, cubicle: 253000},
-            22: {freeA: 165000, freeB: 177000, desk: 210000, cubicle: 230000},
-            23: {freeA: 148500, freeB: 159300, desk: 189000, cubicle: 207000},
-            24: {freeA: 132000, freeB: 141600, desk: 168000, cubicle: 184000},
-            25: {freeA: 115500, freeB: 123900, desk: 147000, cubicle: 161000},
-            26: {freeA: 99000, freeB: 106200, desk: 126000, cubicle: 138000},
-            27: {freeA: 82500, freeB: 88500, desk: 105000, cubicle: 115000},
-            28: {freeA: 66000, freeB: 70800, desk: 84000, cubicle: 92000},
-            29: {freeA: 49500, freeB: 53100, desk: 63000, cubicle: 69000},
-            30: {freeA: 33000, freeB: 35400, desk: 42000, cubicle: 46000},
-            31: {freeA: 16500, freeB: 17700, desk: 21000, cubicle: 23000}
+        const seatTypes = {
+            8: ['전체', '자유석', '지정석_여', '지정석_남', '칸막이'],
+            7: ['전체', '프리미엄', '지정석_여', '지정석_남', '칸막이']
         };
 
-        // 상태 변수
-        let currentSeatType = '자유석';
-        let currentPayment = 'card';
-        let vacationType = 'A';
-        let calculationHistory = [];
+        // 8층 학생 115명
+        const defaultStudents = {
+            8: [
+                { name: '양준빈', phone: '010-5029-5112', parentPhone: '010-7652-5112', seatType: '자유석', seatNumber: '101' },
+                { name: '최준서', phone: '010-3085-7594', parentPhone: '010-3082-7594', seatType: '자유석', seatNumber: '102' },
+                { name: '이혜민', phone: '010-2234-4376', parentPhone: '010-2553-4376', seatType: '자유석', seatNumber: '105' },
+                { name: '김수영', phone: '010-5859-8232', parentPhone: '010-2958-8232', seatType: '자유석', seatNumber: '113' },
+                { name: '김연준', phone: '010-6516-4711', parentPhone: '010-3894-4711', seatType: '자유석', seatNumber: '116' },
+                { name: '변우석', phone: '', parentPhone: '', seatType: '자유석', seatNumber: '117' },
+                { name: '유승찬', phone: '', parentPhone: '', seatType: '자유석', seatNumber: '120' },
+                { name: '추여림', phone: '010-3982-9377', parentPhone: '010-7339-9377', seatType: '자유석', seatNumber: '123' },
+                { name: '이채윤', phone: '010-8464-2920', parentPhone: '010-8374-2920', seatType: '자유석', seatNumber: '125' },
+                { name: '주지원', phone: '000-000-0000', parentPhone: '010-4164-3132', seatType: '자유석', seatNumber: '127' },
+                { name: '박현희', phone: '010-5295-3128', parentPhone: '010-9253-4998', seatType: '자유석', seatNumber: '128' },
+                { name: '김혜민', phone: '000-000-0000', parentPhone: '010-9123-3702', seatType: '자유석', seatNumber: '131' },
+                { name: '이지효', phone: '010-9296-1532', parentPhone: '010-6286-1532', seatType: '자유석', seatNumber: '133' },
+                { name: '김도원', phone: '010-9704-7060', parentPhone: '010-4255-7060', seatType: '자유석', seatNumber: '134' },
+                { name: '류보민', phone: '010-3005-9754', parentPhone: '010-8990-9754', seatType: '자유석', seatNumber: '135' },
+                { name: '정채연', phone: '010-6322-0235', parentPhone: '010-2962-6335', seatType: '자유석', seatNumber: '136' },
+                { name: '한건희', phone: '010-4864-7963', parentPhone: '010-4118-7963', seatType: '자유석', seatNumber: '140' },
+                { name: '박지민', phone: '010-3141-6192', parentPhone: '010-9093-6192', seatType: '자유석', seatNumber: '141' },
+                { name: '김다은', phone: '010-3767-9187', parentPhone: '010-9357-9187', seatType: '자유석', seatNumber: '144' },
+                { name: '백준하', phone: '000-0000-0000', parentPhone: '010-9571-0705', seatType: '자유석', seatNumber: '145' },
+                { name: '이현우', phone: '', parentPhone: '010-7338-1417', seatType: '자유석', seatNumber: '146' },
+                { name: '강성준', phone: '010-5287-4067', parentPhone: '010-4156-5067', seatType: '자유석', seatNumber: '147' },
+                { name: '성민진', phone: '010-8688-0857', parentPhone: '010-3205-6126', seatType: '자유석', seatNumber: '148' },
+                { name: '조재원', phone: '010-2940-6749', parentPhone: '010-3009-6749', seatType: '자유석', seatNumber: '153' },
+                { name: '연서진', phone: '010-2823-8842', parentPhone: '010-9059-4132', seatType: '자유석', seatNumber: '158' },
+                { name: '이유환', phone: '010-3398-7769', parentPhone: '010-2264-7769', seatType: '자유석', seatNumber: '103' },
+                { name: '오예린', phone: '010-9656-8849', parentPhone: '010-7662-8849', seatType: '자유석', seatNumber: '104' },
+                { name: '박서진', phone: '010-5909-7240', parentPhone: '010-2433-7249', seatType: '자유석', seatNumber: '106' },
+                { name: '최수빈', phone: '010-2973-9856', parentPhone: '010-2619-9856', seatType: '자유석', seatNumber: '107' },
+                { name: '김태욱', phone: '010-9508-5976', parentPhone: '010-9528-5976', seatType: '자유석', seatNumber: '108' },
+                { name: '이유담', phone: '010-7928-6947', parentPhone: '010-8788-6947', seatType: '자유석', seatNumber: '109' },
+                { name: '김주형', phone: '010-6471-5419', parentPhone: '010-9396-1274', seatType: '자유석', seatNumber: '110' },
+                { name: '임솔우', phone: '010-8863-8325', parentPhone: '010-8564-8325', seatType: '자유석', seatNumber: '111' },
+                { name: '김민찬', phone: '010-2847-0155', parentPhone: '010-7351-0155', seatType: '자유석', seatNumber: '112' },
+                { name: '박서준', phone: '010-9814-3463', parentPhone: '010-5873-3466', seatType: '자유석', seatNumber: '114' },
+                { name: '이시우', phone: '010-9078-3190', parentPhone: '010-5272-0088', seatType: '자유석', seatNumber: '115' },
+                { name: '심예나', phone: '000-000-0000', parentPhone: '010-9104-5891', seatType: '자유석', seatNumber: '118' },
+                { name: '김지수', phone: '010-2771-2301', parentPhone: '010-4821-2301', seatType: '자유석', seatNumber: '119' },
+                { name: '최윤하', phone: '010-8028-5433', parentPhone: '010-3723-3777', seatType: '자유석', seatNumber: '121' },
+                { name: '신재희', phone: '010-2412-6310', parentPhone: '010-5187-6310', seatType: '자유석', seatNumber: '122' },
+                { name: '최시은', phone: '010-3782-5548', parentPhone: '010-9077-5558', seatType: '자유석', seatNumber: '124' },
+                { name: '박경준', phone: '010-9564-2104', parentPhone: '010-2298-2104', seatType: '자유석', seatNumber: '126' },
+                { name: '김가영', phone: '010-6427-9130', parentPhone: '010-6311-9130', seatType: '자유석', seatNumber: '129' },
+                { name: '김소정', phone: '010-3012-7898', parentPhone: '010-5466-7898', seatType: '자유석', seatNumber: '130' },
+                { name: '최정혁', phone: '010-6797-3708', parentPhone: '010-2797-3708', seatType: '자유석', seatNumber: '132' },
+                { name: '정지우', phone: '010-4934-7935', parentPhone: '010-6829-1219', seatType: '자유석', seatNumber: '137' },
+                { name: '조승찬', phone: '010-8895-8478', parentPhone: '010-3219-2151', seatType: '자유석', seatNumber: '138' },
+                { name: '이연우', phone: '010-4872-2510', parentPhone: '010-2854-0924', seatType: '자유석', seatNumber: '139' },
+                { name: '금준서', phone: '010-8694-9636', parentPhone: '010-7194-9636', seatType: '자유석', seatNumber: '142' },
+                { name: '김서연', phone: '010-4794-0038', parentPhone: '010-8608-0252', seatType: '자유석', seatNumber: '143' },
+                { name: '고한빈', phone: '010-9130-5182', parentPhone: '010-9173-5182', seatType: '자유석', seatNumber: '149' },
+                { name: '장은송', phone: '010-9427-3143', parentPhone: '010-9788-8661', seatType: '자유석', seatNumber: '151' },
+                { name: '최석현', phone: '010-9315-2412', parentPhone: '010-3296-4370', seatType: '자유석', seatNumber: '152' },
+                { name: '장지후', phone: '010-2134-5865', parentPhone: '010-3489-5865', seatType: '자유석', seatNumber: '154' },
+                { name: '곽지우', phone: '010-2585-9417', parentPhone: '010-8267-9417', seatType: '자유석', seatNumber: '155' },
+                { name: '이소정', phone: '010-3955-2245', parentPhone: '010-8819-9555', seatType: '자유석', seatNumber: '156' },
+                { name: '정규헌', phone: '010-7671-2883', parentPhone: '010-8516-9520', seatType: '자유석', seatNumber: '157' },
+                { name: '강예원', phone: '010-6243-2643', parentPhone: '010-6277-2643', seatType: '자유석', seatNumber: '160' },
+                { name: '이현승', phone: '010-5233-3295', parentPhone: '010-9265-3295', seatType: '자유석', seatNumber: '161' },
+                { name: '김연서', phone: '010-2396-0796', parentPhone: '010-6315-0796', seatType: '칸막이', seatNumber: '1' },
+                { name: '이윤지', phone: '010-5676-1065', parentPhone: '010-5207-1065', seatType: '칸막이', seatNumber: '2' },
+                { name: '성예준', phone: '010-4062-7663', parentPhone: '010-2611-4881', seatType: '칸막이', seatNumber: '3' },
+                { name: '백주호', phone: '010-6696-5001', parentPhone: '010-9945-5000', seatType: '칸막이', seatNumber: '4' },
+                { name: '하준우', phone: '000-0000-0000', parentPhone: '010-9172-8400', seatType: '칸막이', seatNumber: '5' },
+                { name: '송나현', phone: '010-4674-0132', parentPhone: '010-3083-7856', seatType: '칸막이', seatNumber: '6' },
+                { name: '황지윤', phone: '010-8927-8179', parentPhone: '010-8936-8179', seatType: '칸막이', seatNumber: '7' },
+                { name: '윤예서', phone: '010-9403-0773', parentPhone: '010-4631-7740', seatType: '칸막이', seatNumber: '8' },
+                { name: '김민우', phone: '010-4005-7508', parentPhone: '010-7299-7508', seatType: '칸막이', seatNumber: '9' },
+                { name: '박지원', phone: '010-8767-5827', parentPhone: '010-8735-5827', seatType: '칸막이', seatNumber: '10' },
+                { name: '오종현', phone: '010-4670-7925', parentPhone: '010-5090-7925', seatType: '칸막이', seatNumber: '11' },
+                { name: '김예나', phone: '010-3277-5128', parentPhone: '010-5327-5128', seatType: '칸막이', seatNumber: '12' },
+                { name: '신유빈', phone: '010-4102-5364', parentPhone: '010-9532-5362', seatType: '칸막이', seatNumber: '13' },
+                { name: '김용희', phone: '010-3713-1890', parentPhone: '010-3713-1890', seatType: '칸막이', seatNumber: '14' },
+                { name: '김현준', phone: '010-6296-9810', parentPhone: '010-5582-4384', seatType: '칸막이', seatNumber: '15' },
+                { name: '권준우', phone: '010-9145-1829', parentPhone: '010-8699-1829', seatType: '칸막이', seatNumber: '16' },
+                { name: '조영준', phone: '010-4647-7630', parentPhone: '010-9449-6047', seatType: '칸막이', seatNumber: '17' },
+                { name: '한승주', phone: '010-4940-3633', parentPhone: '010-8893-3633', seatType: '칸막이', seatNumber: '18' },
+                { name: '김규태', phone: '010-7591-2747', parentPhone: '010-5163-7714', seatType: '칸막이', seatNumber: '19' },
+                { name: '조예원', phone: '010-9915-5683', parentPhone: '010-8834-5683', seatType: '칸막이', seatNumber: '20' },
+                { name: '배창민', phone: '010-6860-8832', parentPhone: '010-3414-8832', seatType: '칸막이', seatNumber: '21' },
+                { name: '신원준', phone: '010-8912-9704', parentPhone: '010-2382-9704', seatType: '칸막이', seatNumber: '22' },
+                { name: '방소연', phone: '010-3675-8697', parentPhone: '010-3358-0688', seatType: '칸막이', seatNumber: '23' },
+                { name: '송은서', phone: '010-5570-9186', parentPhone: '010-2563-9168', seatType: '칸막이', seatNumber: '24' },
+                { name: '한성효', phone: '010-4761-2409', parentPhone: '010-4623-0568', seatType: '칸막이', seatNumber: '25' },
+                { name: '김채원', phone: '010-6637-7632', parentPhone: '010-3613-7632', seatType: '칸막이', seatNumber: '26' },
+                { name: '이석정', phone: '010-9558-2653', parentPhone: '010-4753-2653', seatType: '칸막이', seatNumber: '27' },
+                { name: '이해성', phone: '010-2173-2035', parentPhone: '010-6652-2035', seatType: '칸막이', seatNumber: '28' },
+                { name: '장연우', phone: '010-6854-1040', parentPhone: '010-8875-3377', seatType: '지정석_여', seatNumber: '29' },
+                { name: '최주원', phone: '014-8911-6292', parentPhone: '010-6318-0945', seatType: '지정석_여', seatNumber: '30' },
+                { name: '이서연', phone: '010-6235-3867', parentPhone: '010-6330-9299', seatType: '지정석_여', seatNumber: '31' },
+                { name: '유민서', phone: '010-2123-5792', parentPhone: '010-3657-5792', seatType: '지정석_여', seatNumber: '32' },
+                { name: '강예서', phone: '010-2636-2826', parentPhone: '010-6495-0328', seatType: '지정석_여', seatNumber: '33' },
+                { name: '박서윤', phone: '010-6449-4562', parentPhone: '010-9333-4562', seatType: '지정석_여', seatNumber: '34' },
+                { name: '배성영', phone: '010-6233-5457', parentPhone: '010-6553-1472', seatType: '지정석_여', seatNumber: '35' },
+                { name: '오윤주', phone: '010-4677-6482', parentPhone: '010-2977-4066', seatType: '지정석_여', seatNumber: '36' },
+                { name: '송다미', phone: '010-7466-7087', parentPhone: '010-8518-7332', seatType: '지정석_여', seatNumber: '37' },
+                { name: '정예림', phone: '010-5294-5329', parentPhone: '010-5290-5329', seatType: '지정석_여', seatNumber: '38' },
+                { name: '김나현', phone: '010-4331-9741', parentPhone: '010-8957-2920', seatType: '지정석_여', seatNumber: '39' },
+                { name: '송수린', phone: '010-2479-8014', parentPhone: '010-5738-8014', seatType: '지정석_여', seatNumber: '40' },
+                { name: '박은서', phone: '010-3390-6592', parentPhone: '010-2654-0937', seatType: '지정석_여', seatNumber: '41' },
+                { name: '이선민', phone: '010-7679-8044', parentPhone: '010-6352-8044', seatType: '지정석_여', seatNumber: '42' },
+                { name: '백진환', phone: '010-4021-1592', parentPhone: '010-5005-1204', seatType: '지정석_남', seatNumber: '43' },
+                { name: '윤수혁', phone: '010-3107-4890', parentPhone: '010-4149-4890', seatType: '지정석_남', seatNumber: '44' },
+                { name: '오승준', phone: '010-8466-0849', parentPhone: '010-8957-0849', seatType: '지정석_남', seatNumber: '45' },
+                { name: '백정준', phone: '010-4992-1082', parentPhone: '010-4943-1082', seatType: '지정석_남', seatNumber: '46' },
+                { name: '박진균', phone: '010-9106-4316', parentPhone: '010-9446-4316', seatType: '지정석_남', seatNumber: '47' },
+                { name: '문서진', phone: '010-9230-3782', parentPhone: '010-9031-7577', seatType: '지정석_남', seatNumber: '48' },
+                { name: '강준혁', phone: '010-6542-7286', parentPhone: '010-2710-7286', seatType: '지정석_남', seatNumber: '49' },
+                { name: '손제훈', phone: '010-5104-0657', parentPhone: '010-5104-0657', seatType: '지정석_남', seatNumber: '50' },
+                { name: '이세현', phone: '010-3064-2498', parentPhone: '010-9170-2498', seatType: '지정석_남', seatNumber: '51' },
+                { name: '박성진', phone: '010-4248-3890', parentPhone: '010-9872-0112', seatType: '지정석_남', seatNumber: '52' },
+                { name: '최석현(지정)', phone: '010-9315-2412', parentPhone: '010-3296-4370', seatType: '지정석_남', seatNumber: '53' },
+                { name: '이도헌', phone: '010-5676-1408', parentPhone: '', seatType: '지정석_남', seatNumber: '54' },
+                { name: '심태용', phone: '010-2419-3398', parentPhone: '010-2854-0829', seatType: '지정석_남', seatNumber: '55' },
+                { name: '문하민', phone: '010-7116-8120', parentPhone: '010-2716-8120', seatType: '지정석_남', seatNumber: '56' }
+            ],
+            7: [
+                { name: '김한나', phone: '010-5701-6330', parentPhone: '010-9117-3737', seatType: '프리미엄', seatNumber: '1' },
+                { name: '윤서준', phone: '010-5861-5654', parentPhone: '010-2546-3622', seatType: '프리미엄', seatNumber: '2' },
+                { name: '박찬우', phone: '010-7531-9073', parentPhone: '010-4606-1607', seatType: '프리미엄', seatNumber: '3' },
+                { name: '성지원', phone: '010-9269-3446', parentPhone: '010-8826-3446', seatType: '프리미엄', seatNumber: '4' },
+                { name: '권대희', phone: '010-3012-0936', parentPhone: '010-2509-6280', seatType: '프리미엄', seatNumber: '5' },
+                { name: '황수진', phone: '010-5460-1051', parentPhone: '010-6621-1051', seatType: '프리미엄', seatNumber: '6' },
+                { name: '손유주', phone: '010-4644-2055', parentPhone: '010-2731-2055', seatType: '프리미엄', seatNumber: '7' },
+                { name: '김희진', phone: '010-7386-5651', parentPhone: '010-3257-5651', seatType: '지정석_여', seatNumber: '8' },
+                { name: '조서연', phone: '010-2577-4062', parentPhone: '010-4524-4062', seatType: '지정석_여', seatNumber: '9' },
+                { name: '김준희', phone: '010-8348-9302', parentPhone: '010-3382-9302', seatType: '지정석_여', seatNumber: '10' },
+                { name: '김채이', phone: '010-3765-7528', parentPhone: '010-5191-7528', seatType: '지정석_여', seatNumber: '11' },
+                { name: '이은교', phone: '010-4624-4576', parentPhone: '010-4569-4576', seatType: '지정석_여', seatNumber: '12' },
+                { name: '이서원', phone: '010-2407-9830', parentPhone: '010-3808-1799', seatType: '지정석_여', seatNumber: '13' },
+                { name: '이강우', phone: '010-9397-4649', parentPhone: '010-2744-4649', seatType: '지정석_남', seatNumber: '14' },
+                { name: '서강덕', phone: '010-9160-2996', parentPhone: '010-5333-2996', seatType: '지정석_남', seatNumber: '15' },
+                { name: '박상언', phone: '010-5534-6518', parentPhone: '010-6275-6518', seatType: '지정석_남', seatNumber: '16' },
+                { name: '조인성', phone: '010-7109-5804', parentPhone: '010-6604-5804', seatType: '지정석_남', seatNumber: '17' },
+                { name: '박세진', phone: '010-3723-3890', parentPhone: '010-9429-3890', seatType: '지정석_남', seatNumber: '18' },
+                { name: '김동준', phone: '010-6790-6263', parentPhone: '010-2792-6263', seatType: '지정석_남', seatNumber: '19' },
+                { name: '공태민', phone: '010-5112-5372', parentPhone: '010-3275-5372', seatType: '칸막이', seatNumber: '20' },
+                { name: '심규민', phone: '000-0000-0000', parentPhone: '010-2389-0123', seatType: '칸막이', seatNumber: '21' },
+                { name: '이재빈', phone: '010-6790-6264', parentPhone: '010-5645-3521', seatType: '칸막이', seatNumber: '22' },
+                { name: '김태윤', phone: '000-0000-0000', parentPhone: '010-6471-2138', seatType: '칸막이', seatNumber: '23' },
+                { name: '윤채원', phone: '010-9842-2012', parentPhone: '010-9008-5012', seatType: '칸막이', seatNumber: '24' },
+                { name: '정성호', phone: '010-5093-6224', parentPhone: '010-6246-6224', seatType: '칸막이', seatNumber: '25' },
+                { name: '홍진우', phone: '010-9927-6721', parentPhone: '010-9192-6721', seatType: '칸막이', seatNumber: '26' },
+                { name: '조경율', phone: '010-4002-7196', parentPhone: '010-5480-9885', seatType: '칸막이', seatNumber: '26' },
+                { name: '임승원', phone: '010-4085-4508', parentPhone: '010-4718-4508', seatType: '칸막이', seatNumber: '27' },
+                { name: '강유온', phone: '000-000-0000', parentPhone: '010-4575-6218', seatType: '칸막이', seatNumber: '28' },
+                { name: '최윤하', phone: '010-5028-5433', parentPhone: '010-3723-3777', seatType: '칸막이', seatNumber: '29' },
+                { name: '이민혁', phone: '010-5909-6051', parentPhone: '010-3072-6051', seatType: '칸막이', seatNumber: '31' },
+                { name: '이진우', phone: '010-7645-1273', parentPhone: '010-6663-1273', seatType: '칸막이', seatNumber: '32' },
+                { name: '이성록', phone: '010-5792-7820', parentPhone: '010-2617-2575', seatType: '칸막이', seatNumber: '33' },
+                { name: '김도윤', phone: '010-4594-1497', parentPhone: '010-4549-1497', seatType: '칸막이', seatNumber: '35' },
+                { name: '김예나', phone: '010-7102-6607', parentPhone: '010-6695-6607', seatType: '칸막이', seatNumber: '36' },
+                { name: '김시완', phone: '010-4995-3361', parentPhone: '010-3762-1861', seatType: '칸막이', seatNumber: '37' },
+                { name: '전호경', phone: '010-5942-7842', parentPhone: '010-4427-7842', seatType: '칸막이', seatNumber: '38' },
+                { name: '한영지', phone: '010-3488-8096', parentPhone: '010-2728-8096', seatType: '칸막이', seatNumber: '39' },
+                { name: '이호림', phone: '010-8079-3041', parentPhone: '010-3243-3041', seatType: '칸막이', seatNumber: '40' },
+                { name: '구현', phone: '010-2568-1852', parentPhone: '010-7523-1852', seatType: '칸막이', seatNumber: '41' },
+                { name: '오현지', phone: '010-4390-3265', parentPhone: '010-4371-0622', seatType: '칸막이', seatNumber: '42' },
+                { name: '홍승원', phone: '010-5139-2970', parentPhone: '010-5156-4015', seatType: '칸막이', seatNumber: '43' },
+                { name: '김찬진', phone: '010-9315-7387', parentPhone: '010-2216-7387', seatType: '칸막이', seatNumber: '44' },
+                { name: '고가령', phone: '010-9011-3243', parentPhone: '010-5290-3243', seatType: '칸막이', seatNumber: '45' },
+                { name: '전현서', phone: '010-9882-8116', parentPhone: '010-3336-8116', seatType: '칸막이', seatNumber: '46' },
+                { name: '지형민', phone: '010-8799-6398', parentPhone: '010-8728-6398', seatType: '칸막이', seatNumber: '47' }
+            ]
+        };
 
-        // 초기화
-        document.addEventListener('DOMContentLoaded', function() {
-            initDaySelect();
+        let students = JSON.parse(JSON.stringify(defaultStudents));
+        let paymentHistory = [];
+        let recentStudents = [];
+        let currentFloor = 8;
+        let selectedStudent = null;
+        let selectedPeriod = null;
+        let selectedSeatFilter = '전체';
+        let deleteTarget = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            updateCounts();
+            renderSeatFilter();
+            renderStudentList();
             renderPriceTable();
-            renderVacationTable();
-            renderQuickCalc();
+            renderRecentStudents();
+            updateStats();
+            renderHistory();
+            updateModalSeatTypes();
+            
+            const savedTheme = localStorage.getItem('kimomma_theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                updateThemeIcon();
+            }
         });
 
-        // 등원일 선택 옵션 생성
-        function initDaySelect() {
-            const select = document.getElementById('startDay');
-            for (let i = 1; i <= 31; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = `${i}일`;
-                if (i >= 19) {
-                    option.textContent += ' (방학요금)';
-                }
-                select.appendChild(option);
-            }
+        function loadData() {
+            const saved = localStorage.getItem('kimomma_students_v3');
+            if (saved) students = JSON.parse(saved);
+            const hist = localStorage.getItem('kimomma_history');
+            if (hist) paymentHistory = JSON.parse(hist);
+            const recent = localStorage.getItem('kimomma_recent');
+            if (recent) recentStudents = JSON.parse(recent);
         }
 
-        // 정규 요금표 렌더링
-        function renderPriceTable() {
-            const tbody = document.getElementById('priceTableBody');
-            tbody.innerHTML = '';
-            
-            for (let day = 1; day <= 31; day++) {
-                const prices = regularPrices[day];
-                const row = document.createElement('div');
-                row.className = 'price-table-row';
-                row.onclick = () => selectDay(day);
-                
-                const badge = day >= 19 ? '<span class="badge badge-vacation">방학</span>' : '';
-                
-                row.innerHTML = `
-                    <div>${day}일</div>
-                    <div>${formatNumber(prices.free)}</div>
-                    <div>${formatNumber(prices.desk)}</div>
-                    <div>${formatNumber(prices.cubicle)}</div>
-                    <div>${badge}</div>
-                `;
-                tbody.appendChild(row);
-            }
+        function saveData() {
+            localStorage.setItem('kimomma_students_v3', JSON.stringify(students));
+            localStorage.setItem('kimomma_history', JSON.stringify(paymentHistory));
+            localStorage.setItem('kimomma_recent', JSON.stringify(recentStudents));
         }
 
-        // 방학 요금표 렌더링
-        function renderVacationTable() {
-            const tbody = document.getElementById('vacationTableBody');
-            tbody.innerHTML = '';
-            
-            for (let day = 19; day <= 31; day++) {
-                const prices = vacationPrices[day];
-                const row = document.createElement('div');
-                row.className = 'price-table-row';
-                row.onclick = () => selectDay(day);
-                
-                row.innerHTML = `
-                    <div>${day}일</div>
-                    <div>${formatNumber(prices.freeA)}</div>
-                    <div>${formatNumber(prices.freeB)}</div>
-                    <div>${formatNumber(prices.desk)}</div>
-                    <div>${formatNumber(prices.cubicle)}</div>
-                `;
-                tbody.appendChild(row);
-            }
-        }
-
-        // 빠른 계산 버튼 렌더링
-        function renderQuickCalc() {
-            const container = document.getElementById('quickCalc');
-            const popularDays = [1, 5, 10, 15, 19, 20, 25, 30];
-            
-            container.innerHTML = popularDays.map(day => `
-                <div class="quick-btn" onclick="selectDay(${day})">
-                    <div class="day">${day}</div>
-                    <div class="label">${day >= 19 ? '방학' : '정규'}</div>
-                </div>
-            `).join('');
-        }
-
-        // 날짜 선택
-        function selectDay(day) {
-            document.getElementById('startDay').value = day;
-            
-            // 방학 타입 표시/숨김
-            const vacaGroup = document.getElementById('vacationTypeGroup');
-            if (day >= 19 && currentSeatType === '자유석') {
-                vacaGroup.style.display = 'block';
-            } else {
-                vacaGroup.style.display = 'none';
-            }
-            
-            calculate();
-        }
-
-        // 좌석 유형 선택
-        function selectSeatType(type) {
-            currentSeatType = type;
-            
-            document.querySelectorAll('.tab-container .tab').forEach((tab, index) => {
-                if (index < 3) {
-                    tab.classList.remove('active');
-                }
-            });
+        function switchSection(section) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             event.target.classList.add('active');
-            
-            // 방학 타입 표시 조건 확인
-            const day = parseInt(document.getElementById('startDay').value);
-            const vacaGroup = document.getElementById('vacationTypeGroup');
-            if (day >= 19 && type === '자유석') {
-                vacaGroup.style.display = 'block';
-            } else {
-                vacaGroup.style.display = 'none';
-            }
-            
-            calculate();
+            document.getElementById(`section-${section}`).classList.add('active');
+            if (section === 'stats') updateStats();
+            if (section === 'history') renderHistory();
         }
 
-        // 결제 방식 선택
-        function selectPayment(method) {
-            currentPayment = method;
-            
-            document.getElementById('payCard').classList.toggle('active', method === 'card');
-            document.getElementById('payCash').classList.toggle('active', method === 'cash');
-            
-            calculate();
+        function selectFloor(floor) {
+            currentFloor = floor;
+            selectedStudent = null;
+            selectedPeriod = null;
+            selectedSeatFilter = '전체';
+            document.querySelectorAll('.floor-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.floor-tab.floor-${floor}`).classList.add('active');
+            document.getElementById('calculation-card').style.display = 'none';
+            document.getElementById('price-table-title').textContent = `${floor}층 요금표`;
+            renderSeatFilter();
+            renderStudentList();
+            renderPriceTable();
         }
 
-        // 방학 타입 선택
-        function selectVacationType(type) {
-            vacationType = type;
-            
-            document.getElementById('vacaA').classList.toggle('active', type === 'A');
-            document.getElementById('vacaB').classList.toggle('active', type === 'B');
-            
-            calculate();
+        function updateCounts() {
+            document.getElementById('floor8-count').textContent = `${students[8].length}명`;
+            document.getElementById('floor7-count').textContent = `${students[7].length}명`;
         }
 
-        // 요금표 탭 전환
-        function showPriceTab(tab) {
-            document.getElementById('tabRegular').classList.toggle('active', tab === 'regular');
-            document.getElementById('tabVacation').classList.toggle('active', tab === 'vacation');
-            document.getElementById('regularPriceTable').style.display = tab === 'regular' ? 'block' : 'none';
-            document.getElementById('vacationPriceTable').style.display = tab === 'vacation' ? 'block' : 'none';
+        function renderSeatFilter() {
+            const container = document.getElementById('seat-filter');
+            container.innerHTML = seatTypes[currentFloor].map(type => `
+                <button class="seat-filter-btn ${selectedSeatFilter === type ? 'active' : ''}" 
+                        onclick="filterBySeatType('${type}')">${type}</button>
+            `).join('');
         }
 
-        // 체크박스 토글
-        function toggleCheckbox(element) {
-            element.classList.toggle('active');
+        function filterBySeatType(type) {
+            selectedSeatFilter = type;
+            renderSeatFilter();
+            renderStudentList();
         }
 
-        // 기본 요금 계산
-        function getBasePrice(day, seatType) {
-            if (day >= 19 && seatType === '자유석') {
-                const prices = vacationPrices[day];
-                return vacationType === 'A' ? prices.freeA : prices.freeB;
-            }
-            
-            const prices = regularPrices[day];
-            switch(seatType) {
-                case '자유석': return prices.free;
-                case '지정석': return prices.desk;
-                case '칸막이': return prices.cubicle;
-                default: return 0;
-            }
-        }
+        function filterStudents() { renderStudentList(); }
 
-        // 메인 계산 함수
-        function calculate() {
-            const day = parseInt(document.getElementById('startDay').value);
-            if (!day) {
-                document.getElementById('resultSection').style.display = 'none';
-                return;
-            }
-
-            const period = parseInt(document.getElementById('period').value);
+        function renderStudentList() {
+            const container = document.getElementById('student-list');
+            const search = document.getElementById('student-search').value.toLowerCase();
             
-            // 기본 요금 계산
-            let basePrice = getBasePrice(day, currentSeatType);
-            
-            // 다음 달 요금 추가 (2개월 이상)
-            if (period >= 2) {
-                // 다음 달은 1일 기준 전체 요금
-                const nextMonthPrice = getFullMonthPrice(currentSeatType);
-                basePrice += nextMonthPrice * (period - 1);
-            }
-
-            // 할인 계산
-            let discountRate = 0;
-            if (document.getElementById('discount10').checked) discountRate = 0.1;
-            if (document.getElementById('discount20').checked) discountRate = 0.2;
-            const discountAmount = Math.round(basePrice * discountRate);
-            
-            // 추가 금액
-            const mentorFee = parseInt(document.getElementById('mentorFee').value) || 0;
-            const lockerFee = parseInt(document.getElementById('lockerFee').value) || 0;
-            const moveFee = parseInt(document.getElementById('moveFee').value) || 0;
-            const otherFee = parseInt(document.getElementById('otherFee').value) || 0;
-            const additionalAmount = mentorFee + lockerFee + moveFee + otherFee;
-            
-            // 환불 금액
-            const refundAmount = parseInt(document.getElementById('refundAmount').value) || 0;
-            
-            // 청구 금액 (할인 후 + 추가 - 환불)
-            const chargeAmount = basePrice - discountAmount + additionalAmount - refundAmount;
-            
-            // 실 결제금액 (카드 수수료 적용)
-            let finalAmount = chargeAmount;
-            if (currentPayment === 'card') {
-                // 카드 수수료 약 1.1% 적용
-                finalAmount = Math.round(chargeAmount * 0.989);
-            }
-
-            // 결과 표시
-            document.getElementById('resultSection').style.display = 'block';
-            document.getElementById('resultSection').classList.add('fade-in');
-            
-            document.getElementById('basePrice').textContent = formatCurrency(basePrice);
-            document.getElementById('discountAmount').textContent = `-${formatCurrency(discountAmount)}`;
-            document.getElementById('additionalAmount').textContent = `+${formatCurrency(additionalAmount)}`;
-            document.getElementById('refundDisplay').textContent = `-${formatCurrency(refundAmount)}`;
-            document.getElementById('chargeAmount').textContent = formatCurrency(chargeAmount);
-            document.getElementById('finalAmount').textContent = formatCurrency(finalAmount);
-
-            // 기록 추가
-            addToHistory({
-                seatType: currentSeatType,
-                day: day,
-                period: period,
-                basePrice: basePrice,
-                finalAmount: finalAmount,
-                payment: currentPayment
+            let filtered = students[currentFloor].filter((s, i) => {
+                s._index = i;
+                return s.name.toLowerCase().includes(search) && 
+                       (selectedSeatFilter === '전체' || s.seatType === selectedSeatFilter);
             });
-        }
-
-        // 한달 전체 요금
-        function getFullMonthPrice(seatType) {
-            switch(seatType) {
-                case '자유석': return 390000;
-                case '지정석': return 490000;
-                case '칸막이': return 555000;
-                default: return 0;
-            }
-        }
-
-        // 기록 추가
-        function addToHistory(data) {
-            calculationHistory.unshift(data);
-            if (calculationHistory.length > 5) calculationHistory.pop();
-            renderHistory();
-        }
-
-        // 기록 렌더링
-        function renderHistory() {
-            const container = document.getElementById('historyList');
-            if (calculationHistory.length === 0) {
-                container.innerHTML = '<p style="color: #94a3b8; font-size: 0.9rem; text-align: center; padding: 20px;">계산 기록이 없습니다</p>';
+            
+            if (!filtered.length) {
+                container.innerHTML = '<div class="empty-state"><p>검색 결과가 없습니다</p></div>';
                 return;
             }
-
-            container.innerHTML = calculationHistory.map((item, index) => `
-                <div class="history-item fade-in">
-                    <div class="info">
-                        ${item.seatType} | ${item.day}일 | ${item.period}개월 | ${item.payment === 'card' ? '카드' : '현금'}
+            
+            container.innerHTML = filtered.map(s => `
+                <div class="student-item ${selectedStudent?.name === s.name ? 'selected' : ''}" onclick="selectStudent(${s._index})">
+                    <div class="student-info">
+                        <span class="student-name">${s.name}</span>
+                        <span class="student-detail">${s.seatNumber}번 좌석</span>
                     </div>
-                    <div class="amount">${formatCurrency(item.finalAmount)}</div>
-                    <button class="copy-btn" onclick="copyAmount(${item.finalAmount})" style="margin-top: 8px;">
-                        📋 금액 복사
-                    </button>
+                    <div style="display:flex;align-items:center;">
+                        <span class="seat-badge ${s.seatType}">${s.seatType}</span>
+                        <div class="student-actions" onclick="event.stopPropagation()">
+                            <button class="student-action-btn edit" onclick="openEditModal(${s._index})">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                            </button>
+                            <button class="student-action-btn delete" onclick="openDeleteModal(${s._index}, '${s.name}')">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             `).join('');
         }
 
-        // 금액 복사
-        function copyAmount(amount) {
-            navigator.clipboard.writeText(amount.toString()).then(() => {
-                alert('금액이 복사되었습니다: ' + formatCurrency(amount));
+        function selectStudent(index) {
+            selectedStudent = students[currentFloor][index];
+            selectedStudent._floor = currentFloor;
+            selectedPeriod = null;
+            addToRecent(selectedStudent.name, currentFloor);
+            
+            document.getElementById('calculation-card').style.display = 'block';
+            document.getElementById('selected-student-info').innerHTML = `
+                <div class="name">${selectedStudent.name} (${currentFloor}층)</div>
+                <div class="details">
+                    <div>📍 ${selectedStudent.seatType} ${selectedStudent.seatNumber}번</div>
+                    <div>📱 ${selectedStudent.parentPhone || '미등록'}</div>
+                </div>
+            `;
+            
+            document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('selected'));
+            document.getElementById('total-price').textContent = '₩0';
+            document.getElementById('price-breakdown').textContent = '';
+            document.getElementById('copy-btn').disabled = true;
+            document.getElementById('kakao-btn').disabled = true;
+            document.getElementById('save-btn').disabled = true;
+            
+            renderStudentList();
+            document.getElementById('calculation-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function addToRecent(name, floor) {
+            const key = `${floor}-${name}`;
+            recentStudents = recentStudents.filter(r => `${r.floor}-${r.name}` !== key);
+            recentStudents.unshift({ name, floor });
+            if (recentStudents.length > 5) recentStudents.pop();
+            saveData();
+            renderRecentStudents();
+        }
+
+        function renderRecentStudents() {
+            const container = document.getElementById('recent-students');
+            if (!recentStudents.length) { container.style.display = 'none'; return; }
+            container.style.display = 'flex';
+            container.innerHTML = recentStudents.map(r => `
+                <div class="recent-student-chip" onclick="selectRecentStudent('${r.name}', ${r.floor})">${r.name} (${r.floor}층)</div>
+            `).join('');
+        }
+
+        function selectRecentStudent(name, floor) {
+            if (currentFloor !== floor) selectFloor(floor);
+            const idx = students[floor].findIndex(s => s.name === name);
+            if (idx >= 0) selectStudent(idx);
+        }
+
+        function selectPeriod(months) {
+            if (!selectedStudent) return;
+            selectedPeriod = months;
+            document.querySelectorAll('.period-btn').forEach(b => b.classList.toggle('selected', b.dataset.period == months));
+            calculatePrice();
+        }
+
+        function calculatePrice() {
+            if (!selectedStudent || !selectedPeriod) return;
+            const price = priceData[currentFloor][selectedStudent.seatType][selectedPeriod];
+            document.getElementById('total-price').textContent = `₩${price.toLocaleString()}`;
+            document.getElementById('price-breakdown').textContent = `${selectedStudent.seatType} ${selectedPeriod}개월 (${selectedPeriod * 4}주)`;
+            document.getElementById('copy-btn').disabled = false;
+            document.getElementById('kakao-btn').disabled = false;
+            document.getElementById('save-btn').disabled = false;
+        }
+
+        function copyPrice() {
+            if (!selectedStudent || !selectedPeriod) return;
+            const price = priceData[currentFloor][selectedStudent.seatType][selectedPeriod];
+            navigator.clipboard.writeText(`${selectedStudent.name} ${currentFloor}층 ${selectedStudent.seatType} ${selectedPeriod}개월: ${price.toLocaleString()}원`);
+            showToast('금액이 복사되었습니다');
+        }
+
+        function copyKakaoMessage() {
+            if (!selectedStudent || !selectedPeriod) return;
+            const price = priceData[currentFloor][selectedStudent.seatType][selectedPeriod];
+            const today = new Date();
+            const end = new Date(today);
+            end.setMonth(end.getMonth() + selectedPeriod);
+            const fmt = d => `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`;
+            
+            const msg = `안녕하세요, 김엄마독서실입니다 📚
+
+${selectedStudent.name} 학생 이용료 안내드립니다.
+
+━━━━━━━━━━━━━━━
+📍 이용 정보
+━━━━━━━━━━━━━━━
+• 층: ${currentFloor}층
+• 좌석: ${selectedStudent.seatType} ${selectedStudent.seatNumber}번
+• 기간: ${selectedPeriod}개월 (${selectedPeriod * 4}주)
+
+━━━━━━━━━━━━━━━
+💰 결제 금액
+━━━━━━━━━━━━━━━
+${price.toLocaleString()}원
+
+━━━━━━━━━━━━━━━
+📅 이용 기간
+━━━━━━━━━━━━━━━
+${fmt(today)} ~ ${fmt(end)}
+
+감사합니다 🙏`;
+            navigator.clipboard.writeText(msg);
+            showToast('카카오톡 메시지가 복사되었습니다', 'success');
+        }
+
+        function savePayment() {
+            if (!selectedStudent || !selectedPeriod) return;
+            const price = priceData[currentFloor][selectedStudent.seatType][selectedPeriod];
+            const today = new Date();
+            const end = new Date(today);
+            end.setMonth(end.getMonth() + selectedPeriod);
+            
+            paymentHistory.unshift({
+                id: Date.now(),
+                name: selectedStudent.name,
+                floor: currentFloor,
+                seatType: selectedStudent.seatType,
+                seatNumber: selectedStudent.seatNumber,
+                period: selectedPeriod,
+                amount: price,
+                createdAt: today.toISOString()
             });
+            saveData();
+            showToast('결제 내역이 저장되었습니다', 'success');
+            updateStats();
         }
 
-        // 숫자 포맷팅
-        function formatNumber(num) {
-            return new Intl.NumberFormat('ko-KR').format(num);
+        function renderPriceTable() {
+            const container = document.getElementById('price-table');
+            const prices = priceData[currentFloor];
+            let html = '';
+            for (const [type, p] of Object.entries(prices)) {
+                if (currentFloor === 8 && type === '지정석') continue;
+                html += `
+                    <div class="price-table-row"><span class="label">${type} 1개월</span><span class="value">${p[1].toLocaleString()}원</span></div>
+                    <div class="price-table-row"><span class="label">${type} 2개월</span><span class="value">${p[2].toLocaleString()}원</span></div>
+                    <div class="price-table-row"><span class="label">${type} 3개월</span><span class="value">${p[3].toLocaleString()}원</span></div>
+                `;
+            }
+            container.innerHTML = html;
         }
 
-        function formatCurrency(num) {
-            return new Intl.NumberFormat('ko-KR').format(num) + '원';
+        function updateStats() {
+            document.getElementById('stat-total').textContent = students[7].length + students[8].length;
+            document.getElementById('stat-floor7').textContent = students[7].length;
+            document.getElementById('stat-floor8').textContent = students[8].length;
+            
+            const now = new Date();
+            const monthPayments = paymentHistory.filter(p => {
+                const d = new Date(p.createdAt);
+                return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+            });
+            document.getElementById('stat-payments').textContent = monthPayments.length;
+            
+            renderSeatChart(8, 'chart-floor8');
+            renderSeatChart(7, 'chart-floor7');
+        }
+
+        function renderSeatChart(floor, containerId) {
+            const container = document.getElementById(containerId);
+            const types = seatTypes[floor].filter(t => t !== '전체');
+            const max = Math.max(...types.map(t => students[floor].filter(s => s.seatType === t).length), 1);
+            
+            container.innerHTML = types.map(type => {
+                const count = students[floor].filter(s => s.seatType === type).length;
+                return `
+                    <div class="seat-chart-row">
+                        <span class="seat-chart-label">${type}</span>
+                        <div class="seat-chart-bar-bg">
+                            <div class="seat-chart-bar ${type}" style="width: ${(count/max)*100}%"></div>
+                        </div>
+                        <span class="seat-chart-count">${count}명</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history-list');
+            if (!paymentHistory.length) {
+                container.innerHTML = '<div class="empty-state"><p>결제 내역이 없습니다</p></div>';
+                return;
+            }
+            container.innerHTML = paymentHistory.map((item, i) => {
+                const d = new Date(item.createdAt);
+                return `
+                    <div class="history-item">
+                        <div class="history-info">
+                            <h4>${item.name} (${item.floor}층)</h4>
+                            <p>${item.seatType} ${item.seatNumber}번 · ${item.period}개월 · ${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}</p>
+                        </div>
+                        <div style="display:flex;align-items:center;">
+                            <span class="history-amount">₩${item.amount.toLocaleString()}</span>
+                            <button class="history-delete" onclick="deleteHistory(${i})">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function deleteHistory(index) {
+            paymentHistory.splice(index, 1);
+            saveData();
+            renderHistory();
+            updateStats();
+            showToast('내역이 삭제되었습니다');
+        }
+
+        function exportHistory() {
+            if (!paymentHistory.length) { showToast('내보낼 내역이 없습니다', 'error'); return; }
+            let csv = '이름,층,좌석유형,좌석번호,기간(개월),금액,결제일\n';
+            paymentHistory.forEach(item => {
+                const d = new Date(item.createdAt);
+                csv += `${item.name},${item.floor}층,${item.seatType},${item.seatNumber},${item.period},${item.amount},${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}\n`;
+            });
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `김엄마독서실_결제내역_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+            showToast('CSV 파일이 다운로드됩니다', 'success');
+        }
+
+        function openAddModal() {
+            document.getElementById('modal-title').textContent = '신규 학생 추가';
+            document.getElementById('modal-submit').textContent = '추가하기';
+            document.getElementById('edit-index').value = '';
+            document.getElementById('modal-name').value = '';
+            document.getElementById('modal-floor').value = currentFloor;
+            document.getElementById('modal-seat-number').value = '';
+            document.getElementById('modal-student-phone').value = '';
+            document.getElementById('modal-parent-phone').value = '';
+            updateModalSeatTypes();
+            document.getElementById('student-modal').classList.add('active');
+        }
+
+        function openEditModal(index) {
+            const s = students[currentFloor][index];
+            document.getElementById('modal-title').textContent = '학생 정보 수정';
+            document.getElementById('modal-submit').textContent = '저장하기';
+            document.getElementById('edit-index').value = index;
+            document.getElementById('modal-name').value = s.name;
+            document.getElementById('modal-floor').value = currentFloor;
+            document.getElementById('modal-seat-number').value = s.seatNumber;
+            document.getElementById('modal-student-phone').value = s.phone;
+            document.getElementById('modal-parent-phone').value = s.parentPhone;
+            updateModalSeatTypes();
+            document.getElementById('modal-seat-type').value = s.seatType;
+            document.getElementById('student-modal').classList.add('active');
+        }
+
+        function closeStudentModal() { document.getElementById('student-modal').classList.remove('active'); }
+
+        function updateModalSeatTypes() {
+            const floor = parseInt(document.getElementById('modal-floor').value);
+            const sel = document.getElementById('modal-seat-type');
+            sel.innerHTML = seatTypes[floor].filter(t => t !== '전체').map(t => `<option value="${t}">${t}</option>`).join('');
+        }
+
+        function saveStudent() {
+            const editIdx = document.getElementById('edit-index').value;
+            const name = document.getElementById('modal-name').value.trim();
+            const floor = parseInt(document.getElementById('modal-floor').value);
+            const seatType = document.getElementById('modal-seat-type').value;
+            const seatNumber = document.getElementById('modal-seat-number').value.trim() || '미정';
+            const phone = document.getElementById('modal-student-phone').value.trim();
+            const parentPhone = document.getElementById('modal-parent-phone').value.trim();
+            
+            if (!name) { showToast('학생 이름을 입력해주세요', 'error'); return; }
+            
+            const data = { name, phone, parentPhone, seatType, seatNumber };
+            
+            if (editIdx !== '') {
+                students[currentFloor][parseInt(editIdx)] = data;
+                showToast('학생 정보가 수정되었습니다', 'success');
+            } else {
+                students[floor].push(data);
+                showToast(`${name} 학생이 추가되었습니다`, 'success');
+            }
+            
+            saveData();
+            updateCounts();
+            renderStudentList();
+            updateStats();
+            closeStudentModal();
+        }
+
+        function openDeleteModal(index, name) {
+            deleteTarget = { index, floor: currentFloor };
+            document.getElementById('delete-message').textContent = `"${name}" 학생을 정말 삭제하시겠습니까?`;
+            document.getElementById('delete-modal').classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.remove('active');
+            deleteTarget = null;
+        }
+
+        function confirmDelete() {
+            if (!deleteTarget) return;
+            students[deleteTarget.floor].splice(deleteTarget.index, 1);
+            saveData();
+            updateCounts();
+            renderStudentList();
+            updateStats();
+            closeDeleteModal();
+            showToast('학생이 삭제되었습니다');
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
+            localStorage.setItem('kimomma_theme', isDark ? '' : 'dark');
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            document.getElementById('theme-icon').innerHTML = isDark 
+                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>'
+                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>';
+        }
+
+        function showToast(message, type = '') {
+            const toast = document.getElementById('toast');
+            toast.className = 'toast';
+            if (type) toast.classList.add(type);
+            document.getElementById('toast-message').textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
         }
     </script>
 </body>
