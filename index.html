@@ -1009,6 +1009,72 @@
 
         .student-list::-webkit-scrollbar-thumb,
         .recent-students::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }
+
+        /* 만료 예정 알림 스타일 */
+        .expiry-card { border: 2px solid #f59e0b; }
+        
+        .expiry-count {
+            background: #ef4444;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .expiry-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .expiry-item:last-child { border-bottom: none; }
+
+        .expiry-item .info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .expiry-item .name {
+            font-weight: 600;
+            font-size: 0.9375rem;
+            color: var(--gray-800);
+        }
+
+        .expiry-item .detail {
+            font-size: 0.8125rem;
+            color: var(--gray-500);
+        }
+
+        .expiry-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .expiry-badge.expired {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .expiry-badge.today {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .expiry-badge.soon {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .expiry-badge.upcoming {
+            background: #dbeafe;
+            color: #2563eb;
+        }
     </style>
 </head>
 <body>
@@ -1033,6 +1099,22 @@
 
         <!-- Calculator Section -->
         <div class="section active" id="section-calculator">
+            <!-- 만료 예정 알림 -->
+            <div class="card expiry-card" id="expiry-card" style="display: none;">
+                <div class="card-header" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-bottom: none;">
+                    <h2 style="color: #92400e;">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        결제 만료 예정
+                    </h2>
+                    <span class="expiry-count" id="expiry-count">0명</span>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div id="expiry-list"></div>
+                </div>
+            </div>
+
             <div class="floor-tabs">
                 <button class="floor-tab floor-8 active" onclick="selectFloor(8)">
                     <span>8층</span>
@@ -1199,10 +1281,40 @@
 
         <!-- History Section -->
         <div class="section" id="section-history">
+            <!-- 백업/복원 카드 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>💾 데이터 백업</h2>
+                </div>
+                <div class="card-body">
+                    <p style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: 16px;">
+                        학생 데이터와 결제 내역을 파일로 저장하고 복원할 수 있습니다.
+                    </p>
+                    <div class="action-buttons">
+                        <button class="action-btn primary" onclick="exportBackup()">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                            </svg>
+                            백업 파일 저장
+                        </button>
+                        <button class="action-btn kakao" onclick="document.getElementById('restore-file').click()">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            백업 파일 복원
+                        </button>
+                        <input type="file" id="restore-file" accept=".json" style="display:none;" onchange="importBackup(event)">
+                    </div>
+                    <div class="backup-info" style="margin-top: 16px; padding: 12px; background: var(--warning-light); border-radius: 8px; font-size: 0.8125rem; color: #92400e;">
+                        💡 <strong>권장:</strong> 주 1회 백업 파일 저장해두세요!
+                    </div>
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-header">
                     <h2>📋 결제 내역</h2>
-                    <button class="icon-btn" onclick="exportHistory()" title="내보내기">
+                    <button class="icon-btn" onclick="exportHistory()" title="CSV 내보내기">
                         <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                         </svg>
@@ -1504,6 +1616,7 @@
             updateStats();
             renderHistory();
             updateModalSeatTypes();
+            checkExpiringPayments(); // 만료 예정 체크 추가
             
             const savedTheme = localStorage.getItem('kimomma_theme');
             if (savedTheme === 'dark') {
@@ -1511,6 +1624,91 @@
                 updateThemeIcon();
             }
         });
+
+        // 만료 예정 체크 함수
+        function checkExpiringPayments() {
+            const now = new Date();
+            const expiringList = [];
+            
+            paymentHistory.forEach(payment => {
+                const startDate = new Date(payment.createdAt);
+                const endDate = new Date(startDate);
+                endDate.setMonth(endDate.getMonth() + payment.period);
+                
+                const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+                
+                // 만료됨, 오늘, 7일 이내
+                if (daysLeft <= 7) {
+                    expiringList.push({
+                        ...payment,
+                        endDate: endDate,
+                        daysLeft: daysLeft
+                    });
+                }
+            });
+            
+            // 중복 제거 (같은 학생의 최신 결제만)
+            const uniqueExpiring = [];
+            const seenNames = new Set();
+            expiringList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            for (const item of expiringList) {
+                const key = `${item.floor}-${item.name}`;
+                if (!seenNames.has(key)) {
+                    seenNames.add(key);
+                    uniqueExpiring.push(item);
+                }
+            }
+            
+            // 만료일 순 정렬
+            uniqueExpiring.sort((a, b) => a.daysLeft - b.daysLeft);
+            
+            renderExpiringList(uniqueExpiring);
+        }
+
+        function renderExpiringList(list) {
+            const card = document.getElementById('expiry-card');
+            const container = document.getElementById('expiry-list');
+            const countEl = document.getElementById('expiry-count');
+            
+            if (!list.length) {
+                card.style.display = 'none';
+                return;
+            }
+            
+            card.style.display = 'block';
+            countEl.textContent = `${list.length}명`;
+            
+            container.innerHTML = list.map(item => {
+                let badgeClass, badgeText;
+                
+                if (item.daysLeft < 0) {
+                    badgeClass = 'expired';
+                    badgeText = `${Math.abs(item.daysLeft)}일 지남`;
+                } else if (item.daysLeft === 0) {
+                    badgeClass = 'today';
+                    badgeText = '오늘 만료';
+                } else if (item.daysLeft <= 3) {
+                    badgeClass = 'soon';
+                    badgeText = `${item.daysLeft}일 남음`;
+                } else {
+                    badgeClass = 'upcoming';
+                    badgeText = `${item.daysLeft}일 남음`;
+                }
+                
+                const endStr = `${item.endDate.getMonth()+1}/${item.endDate.getDate()}`;
+                
+                return `
+                    <div class="expiry-item">
+                        <div class="info">
+                            <span class="name">${item.name} (${item.floor}층)</span>
+                            <span class="detail">${item.seatType} · 만료일: ${endStr}</span>
+                        </div>
+                        <span class="expiry-badge ${badgeClass}">${badgeText}</span>
+                    </div>
+                `;
+            }).join('');
+        }
 
         function loadData() {
             const saved = localStorage.getItem('kimomma_students_v3');
@@ -1826,6 +2024,7 @@ ${fmt(today)} ~ ${fmt(end)}
             saveData();
             showToast('결제 내역이 저장되었습니다', 'success');
             updateStats();
+            checkExpiringPayments(); // 만료 예정 다시 체크
         }
 
         function renderPriceTable() {
@@ -1916,6 +2115,7 @@ ${fmt(today)} ~ ${fmt(end)}
             saveData();
             renderHistory();
             updateStats();
+            checkExpiringPayments(); // 만료 예정 다시 체크
             showToast('내역이 삭제되었습니다');
         }
 
@@ -1932,6 +2132,74 @@ ${fmt(today)} ~ ${fmt(end)}
             link.download = `김엄마독서실_결제내역_${new Date().toISOString().slice(0,10)}.csv`;
             link.click();
             showToast('CSV 파일이 다운로드됩니다', 'success');
+        }
+
+        // 백업 내보내기
+        function exportBackup() {
+            const backupData = {
+                version: 'v2',
+                exportDate: new Date().toISOString(),
+                students: students,
+                paymentHistory: paymentHistory,
+                recentStudents: recentStudents
+            };
+            
+            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            const date = new Date().toISOString().slice(0,10);
+            link.download = `김엄마독서실_백업_${date}.json`;
+            link.click();
+            showToast('백업 파일이 저장되었습니다!', 'success');
+        }
+
+        // 백업 복원
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    // 데이터 유효성 검사
+                    if (!data.students || !data.students[7] || !data.students[8]) {
+                        showToast('올바른 백업 파일이 아닙니다', 'error');
+                        return;
+                    }
+                    
+                    // 확인 메시지
+                    const studentCount = data.students[7].length + data.students[8].length;
+                    const historyCount = data.paymentHistory ? data.paymentHistory.length : 0;
+                    
+                    if (confirm(`백업 데이터를 복원하시겠습니까?\n\n` +
+                               `• 학생 수: ${studentCount}명\n` +
+                               `• 결제 내역: ${historyCount}건\n` +
+                               `• 백업 날짜: ${data.exportDate ? data.exportDate.slice(0,10) : '알 수 없음'}\n\n` +
+                               `⚠️ 현재 데이터가 덮어씌워집니다!`)) {
+                        
+                        students = data.students;
+                        paymentHistory = data.paymentHistory || [];
+                        recentStudents = data.recentStudents || [];
+                        
+                        saveData();
+                        updateCounts();
+                        renderStudentList();
+                        renderHistory();
+                        updateStats();
+                        renderRecentStudents();
+                        checkExpiringPayments(); // 만료 예정 체크 추가
+                        
+                        showToast(`복원 완료! (학생 ${studentCount}명, 내역 ${historyCount}건)`, 'success');
+                    }
+                } catch (err) {
+                    showToast('파일을 읽을 수 없습니다', 'error');
+                    console.error(err);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // 같은 파일 다시 선택 가능하도록
         }
 
         function openAddModal() {
