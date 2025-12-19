@@ -396,11 +396,12 @@
         }
 
         .seat-badge.자유석 { background: #fef3c7; color: #92400e; }
-        .seat-badge.지정석 { background: #dbeafe; color: #1e40af; }
-        .seat-badge.지정석_여 { background: #fce7f3; color: #9d174d; }
-        .seat-badge.지정석_남 { background: #dbeafe; color: #1e40af; }
+        .seat-badge.오픈형 { background: #dbeafe; color: #1e40af; }
         .seat-badge.칸막이 { background: #d1fae5; color: #065f46; }
-        .seat-badge.프리미엄 { background: #fef3c7; color: #92400e; }
+        .seat-badge.프리미엄 { background: #fce7f3; color: #9d174d; }
+        .seat-badge.지정석_여 { background: #dbeafe; color: #1e40af; }
+        .seat-badge.지정석_남 { background: #dbeafe; color: #1e40af; }
+        .seat-badge.지정석 { background: #dbeafe; color: #1e40af; }
 
         .selected-student-card {
             background: linear-gradient(135deg, var(--primary-light) 0%, #eff6ff 100%);
@@ -1176,15 +1177,75 @@
                         </div>
                     </div>
 
+                    <!-- 등원일 선택 -->
+                    <div class="form-group">
+                        <label>등원 시작일</label>
+                        <select id="start-day" onchange="calculatePrice()">
+                            <option value="1">1일</option>
+                            <option value="2">2일</option>
+                            <option value="3">3일</option>
+                            <option value="4">4일</option>
+                            <option value="5">5일</option>
+                            <option value="6">6일</option>
+                            <option value="7">7일</option>
+                            <option value="8">8일</option>
+                            <option value="9">9일</option>
+                            <option value="10">10일</option>
+                            <option value="11">11일</option>
+                            <option value="12">12일</option>
+                            <option value="13">13일</option>
+                            <option value="14">14일</option>
+                            <option value="15">15일</option>
+                            <option value="16">16일</option>
+                            <option value="17">17일</option>
+                            <option value="18">18일</option>
+                            <option value="19">19일</option>
+                            <option value="20">20일</option>
+                            <option value="21">21일</option>
+                            <option value="22">22일</option>
+                            <option value="23">23일</option>
+                            <option value="24">24일</option>
+                            <option value="25">25일</option>
+                            <option value="26">26일</option>
+                            <option value="27">27일</option>
+                            <option value="28">28일</option>
+                            <option value="29">29일</option>
+                            <option value="30">30일</option>
+                            <option value="31">31일</option>
+                        </select>
+                        <p style="font-size: 0.75rem; color: var(--gray-500); margin-top: 4px;">* 날짜별 금액이 자동 적용됩니다</p>
+                    </div>
+
                     <!-- 추가 옵션 섹션 -->
                     <div class="options-section">
-                        <div class="options-title">⚙️ 추가 옵션</div>
+                        <div class="options-title">⚙️ 이용권 선택</div>
                         
+                        <!-- 종일권/오후권 선택 -->
+                        <div class="discount-btn-group">
+                            <button class="discount-btn ticket-btn active" data-ticket="종일권" onclick="selectTicketType('종일권')">🌞 종일권</button>
+                            <button class="discount-btn ticket-btn" data-ticket="오후권" onclick="selectTicketType('오후권')">🌙 오후권</button>
+                        </div>
+                        <p style="font-size: 0.75rem; color: var(--gray-500); margin-bottom: 12px;">* 방학: 종일권 / 학기중: 오후권 (N수생 제외)</p>
+                        
+                        <!-- 멘토링 포함 -->
+                        <div class="option-item" id="mentoring-option" onclick="toggleOption('mentoring')">
+                            <input type="checkbox" id="opt-mentoring" onchange="calculatePrice()">
+                            <span class="option-label">📝 멘토링 서비스 포함</span>
+                            <span class="option-value" id="mentoring-price">+4만원</span>
+                        </div>
+
                         <!-- 사물함 -->
                         <div class="option-item" onclick="toggleOption('locker')">
                             <input type="checkbox" id="opt-locker" onchange="calculatePrice()">
                             <span class="option-label">🔐 사물함</span>
-                            <span class="option-value">+20,000원/월</span>
+                            <span class="option-value">+2만원/월</span>
+                        </div>
+
+                        <!-- 최초가입비 -->
+                        <div class="option-item" onclick="toggleOption('register')">
+                            <input type="checkbox" id="opt-register" onchange="calculatePrice()">
+                            <span class="option-label">🆕 최초가입비</span>
+                            <span class="option-value">+10만원</span>
                         </div>
 
                         <!-- 할인 -->
@@ -1193,13 +1254,6 @@
                             <button class="discount-btn active" data-discount="0" onclick="selectDiscount(0)">없음</button>
                             <button class="discount-btn" data-discount="10" onclick="selectDiscount(10)">10%</button>
                             <button class="discount-btn" data-discount="20" onclick="selectDiscount(20)">20%</button>
-                        </div>
-
-                        <!-- 멘토링 -->
-                        <div class="option-input-group">
-                            <label>📝 멘토링비</label>
-                            <input type="number" id="mentoring-fee" placeholder="0" min="0" oninput="calculatePrice()">
-                            <span style="color: var(--gray-500); font-size: 0.875rem;">원</span>
                         </div>
                     </div>
 
@@ -1238,7 +1292,7 @@
                         <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
-                        <span id="price-table-title">8층 요금표</span>
+                        <span id="price-table-title">📅 날짜별 요금표</span>
                     </h2>
                 </div>
                 <div class="card-body">
@@ -1404,28 +1458,84 @@
     </div>
 
     <script>
-        const priceData = {
-            8: {
-                '자유석': { 1: 220000, 2: 400000, 3: 540000 },
-                '지정석': { 1: 350000, 2: 640000, 3: 870000 },
-                '지정석_여': { 1: 350000, 2: 640000, 3: 870000 },
-                '지정석_남': { 1: 350000, 2: 640000, 3: 870000 },
-                '칸막이': { 1: 400000, 2: 730000, 3: 1000000 }
+        // 월 기본 요금표
+        const monthlyPrices = {
+            종일권: {
+                '프리미엄': 790000,      // N수생
+                '칸막이': 690000,
+                '칸막이_멘토링': 730000,
+                '오픈형': 630000,
+                '자유석': 490000
             },
-            7: {
-                '프리미엄': { 1: 450000, 2: 820000, 3: 1120000 },
-                '지정석_여': { 1: 350000, 2: 640000, 3: 870000 },
-                '지정석_남': { 1: 350000, 2: 640000, 3: 870000 },
-                '칸막이': { 1: 400000, 2: 730000, 3: 1000000 }
+            오후권: {
+                '칸막이': 550000,
+                '칸막이_멘토링': 650000,
+                '오픈형': 530000,
+                '오픈형_멘토링': 590000,
+                '자유석': 390000
             }
         };
 
-        const LOCKER_FEE = 20000; // 사물함 월 비용
+        // 8층 일할계산 요금표 (12월 기준, 사물함 제외)
+        const dailyPriceTable_8F = {
+            '자유석': {
+                1: 390000, 2: 377000, 3: 364000, 4: 351000, 5: 338000,
+                6: 325000, 7: 312000, 8: 299000, 9: 286000, 10: 273000,
+                11: 260000, 12: 247000, 13: 234000, 14: 221000, 15: 221000,
+                16: 208000, 17: 195000, 18: 182000, 19: 169000, 20: 156000,
+                21: 143000, 22: 130000, 23: 117000, 24: 104000, 25: 91000,
+                26: 78000, 27: 65000, 28: 52000, 29: 39000, 30: 26000, 31: 13000
+            },
+            '오픈형': {
+                1: 490000, 2: 475600, 3: 459200, 4: 442800, 5: 426400,
+                6: 410000, 7: 393600, 8: 377200, 9: 360800, 10: 344400,
+                11: 328000, 12: 311600, 13: 295200, 14: 278800, 15: 278800,
+                16: 262400, 17: 246000, 18: 229600, 19: 213200, 20: 196800,
+                21: 180400, 22: 164000, 23: 147600, 24: 131200, 25: 114800,
+                26: 98400, 27: 82000, 28: 65600, 29: 49200, 30: 32800, 31: 16400
+            },
+            '칸막이': {
+                1: 555000, 2: 536500, 3: 518000, 4: 499500, 5: 481000,
+                6: 462500, 7: 444000, 8: 425500, 9: 407000, 10: 388500,
+                11: 370000, 12: 351500, 13: 333000, 14: 314500, 15: 314500,
+                16: 296000, 17: 277500, 18: 259000, 19: 240500, 20: 222000,
+                21: 203500, 22: 185000, 23: 166500, 24: 148000, 25: 129500,
+                26: 111000, 27: 92500, 28: 74000, 29: 55500, 30: 37000, 31: 18500
+            }
+        };
+
+        // 7층 일할계산 요금표 (19일~31일, 방학 기준)
+        const dailyPriceTable_7F = {
+            '오픈형': {
+                19: 273000, 20: 252000, 21: 231000, 22: 210000, 23: 189000,
+                24: 168000, 25: 147000, 26: 126000, 27: 105000, 28: 84000,
+                29: 63000, 30: 42000, 31: 21000
+            },
+            '칸막이': {
+                19: 299000, 20: 276000, 21: 253000, 22: 230000, 23: 207000,
+                24: 184000, 25: 161000, 26: 138000, 27: 115000, 28: 92000,
+                29: 69000, 30: 46000, 31: 23000
+            }
+        };
+
+        const LOCKER_FEE = 20000;      // 사물함 월 비용
+        const REGISTER_FEE = 100000;   // 최초가입비
 
         const seatTypes = {
-            8: ['전체', '자유석', '지정석_여', '지정석_남', '칸막이'],
-            7: ['전체', '프리미엄', '지정석_여', '지정석_남', '칸막이']
+            8: ['전체', '자유석', '오픈형', '칸막이'],
+            7: ['전체', '프리미엄', '오픈형', '칸막이']
         };
+
+        // 좌석유형 매핑 (기존 데이터 호환)
+        const seatTypeMapping = {
+            '지정석_여': '오픈형',
+            '지정석_남': '오픈형',
+            '지정석': '오픈형'
+        };
+
+        function normalizeSeatType(type) {
+            return seatTypeMapping[type] || type;
+        }
 
         // 8층 학생 115명
         const defaultStudents = {
@@ -1604,6 +1714,7 @@
         let selectedPeriod = null;
         let selectedSeatFilter = '전체';
         let selectedDiscount = 0;
+        let selectedTicketType = '종일권';
         let deleteTarget = null;
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1631,9 +1742,16 @@
             const expiringList = [];
             
             paymentHistory.forEach(payment => {
-                const startDate = new Date(payment.createdAt);
-                const endDate = new Date(startDate);
-                endDate.setMonth(endDate.getMonth() + payment.period);
+                let endDate;
+                
+                // endDate가 있으면 사용, 없으면 계산
+                if (payment.endDate) {
+                    endDate = new Date(payment.endDate);
+                } else {
+                    const startDate = new Date(payment.createdAt);
+                    endDate = new Date(startDate);
+                    endDate.setMonth(endDate.getMonth() + payment.period);
+                }
                 
                 const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
                 
@@ -1742,7 +1860,6 @@
             document.querySelectorAll('.floor-tab').forEach(t => t.classList.remove('active'));
             document.querySelector(`.floor-tab.floor-${floor}`).classList.add('active');
             document.getElementById('calculation-card').style.display = 'none';
-            document.getElementById('price-table-title').textContent = `${floor}층 요금표`;
             renderSeatFilter();
             renderStudentList();
             renderPriceTable();
@@ -1775,8 +1892,11 @@
             
             let filtered = students[currentFloor].filter((s, i) => {
                 s._index = i;
-                return s.name.toLowerCase().includes(search) && 
-                       (selectedSeatFilter === '전체' || s.seatType === selectedSeatFilter);
+                const normalizedType = normalizeSeatType(s.seatType);
+                const matchesFilter = selectedSeatFilter === '전체' || 
+                                      normalizedType === selectedSeatFilter ||
+                                      s.seatType === selectedSeatFilter;
+                return s.name.toLowerCase().includes(search) && matchesFilter;
             });
             
             if (!filtered.length) {
@@ -1784,14 +1904,16 @@
                 return;
             }
             
-            container.innerHTML = filtered.map(s => `
+            container.innerHTML = filtered.map(s => {
+                const displayType = normalizeSeatType(s.seatType);
+                return `
                 <div class="student-item ${selectedStudent?.name === s.name ? 'selected' : ''}" onclick="selectStudent(${s._index})">
                     <div class="student-info">
                         <span class="student-name">${s.name}</span>
                         <span class="student-detail">${s.seatNumber}번 좌석</span>
                     </div>
                     <div style="display:flex;align-items:center;">
-                        <span class="seat-badge ${s.seatType}">${s.seatType}</span>
+                        <span class="seat-badge ${displayType}">${displayType}</span>
                         <div class="student-actions" onclick="event.stopPropagation()">
                             <button class="student-action-btn edit" onclick="openEditModal(${s._index})">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1806,7 +1928,7 @@
                         </div>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function selectStudent(index) {
@@ -1827,9 +1949,16 @@
             
             // 초기화
             document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('selected'));
+            document.getElementById('start-day').value = '1';
             document.getElementById('opt-locker').checked = false;
-            document.getElementById('mentoring-fee').value = '';
+            document.getElementById('opt-mentoring').checked = false;
+            document.getElementById('opt-register').checked = false;
+            selectedTicketType = '종일권';
+            document.querySelectorAll('.ticket-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.ticket === '종일권');
+            });
             selectDiscount(0);
+            updateMentoringPrice();
             document.getElementById('total-price').textContent = '₩0';
             document.getElementById('price-breakdown').innerHTML = '';
             document.getElementById('copy-btn').disabled = true;
@@ -1874,7 +2003,10 @@
         function toggleOption(type) {
             const checkbox = document.getElementById(`opt-${type}`);
             checkbox.checked = !checkbox.checked;
-            checkbox.closest('.option-item').classList.toggle('active', checkbox.checked);
+            const optionItem = checkbox.closest('.option-item');
+            if (optionItem) {
+                optionItem.classList.toggle('active', checkbox.checked);
+            }
             calculatePrice();
         }
 
@@ -1889,24 +2021,85 @@
         function calculatePrice() {
             if (!selectedStudent || !selectedPeriod) return;
             
-            const basePrice = priceData[currentFloor][selectedStudent.seatType][selectedPeriod];
+            const startDay = parseInt(document.getElementById('start-day').value);
             const hasLocker = document.getElementById('opt-locker').checked;
-            const mentoringFee = parseInt(document.getElementById('mentoring-fee').value) || 0;
+            const hasMentoring = document.getElementById('opt-mentoring').checked;
+            const hasRegister = document.getElementById('opt-register').checked;
+            const seatType = normalizeSeatType(selectedStudent.seatType);
+            
+            let seatPrice = 0;
+            let seatPriceLabel = '';
+            
+            // 12월 일할계산 vs 1월~ 월정액
+            if (startDay === 1) {
+                // 1일 시작 = 월정액
+                if (seatType === '프리미엄') {
+                    seatPrice = monthlyPrices.종일권['프리미엄'];
+                    seatPriceLabel = '프리미엄';
+                } else if (hasMentoring && (seatType === '칸막이' || seatType === '오픈형')) {
+                    const key = seatType + '_멘토링';
+                    seatPrice = monthlyPrices[selectedTicketType][key] || monthlyPrices[selectedTicketType][seatType];
+                    seatPriceLabel = `${seatType} (멘토링)`;
+                } else {
+                    seatPrice = monthlyPrices[selectedTicketType][seatType] || 0;
+                    seatPriceLabel = seatType;
+                }
+            } else {
+                // 일할계산 (12월)
+                if (currentFloor === 8) {
+                    const tableType = seatType === '오픈형' ? '오픈형' : seatType;
+                    seatPrice = dailyPriceTable_8F[tableType] ? dailyPriceTable_8F[tableType][startDay] : 0;
+                } else {
+                    // 7층 (19일~)
+                    const tableType = seatType === '오픈형' ? '오픈형' : seatType;
+                    seatPrice = dailyPriceTable_7F[tableType] ? dailyPriceTable_7F[tableType][startDay] : 0;
+                }
+                seatPriceLabel = `${seatType} (${startDay}일 시작)`;
+            }
+            
+            // 기간에 따른 계산
+            let totalSeatPrice = seatPrice;
+            if (selectedPeriod === 2) {
+                // 2개월: 일할 + 다음달 전체
+                let fullMonthPrice;
+                if (seatType === '프리미엄') {
+                    fullMonthPrice = monthlyPrices.종일권['프리미엄'];
+                } else if (hasMentoring) {
+                    const key = seatType + '_멘토링';
+                    fullMonthPrice = monthlyPrices[selectedTicketType][key] || monthlyPrices[selectedTicketType][seatType];
+                } else {
+                    fullMonthPrice = monthlyPrices[selectedTicketType][seatType] || 0;
+                }
+                totalSeatPrice = seatPrice + fullMonthPrice;
+            } else if (selectedPeriod === 3) {
+                // 3개월
+                let fullMonthPrice;
+                if (seatType === '프리미엄') {
+                    fullMonthPrice = monthlyPrices.종일권['프리미엄'];
+                } else if (hasMentoring) {
+                    const key = seatType + '_멘토링';
+                    fullMonthPrice = monthlyPrices[selectedTicketType][key] || monthlyPrices[selectedTicketType][seatType];
+                } else {
+                    fullMonthPrice = monthlyPrices[selectedTicketType][seatType] || 0;
+                }
+                totalSeatPrice = seatPrice + (fullMonthPrice * 2);
+            }
             
             // 할인 적용 (좌석요금에만)
-            const discountAmount = Math.round(basePrice * selectedDiscount / 100);
-            const discountedSeatPrice = basePrice - discountAmount;
+            const discountAmount = Math.round(totalSeatPrice * selectedDiscount / 100);
+            const discountedSeatPrice = totalSeatPrice - discountAmount;
             
-            // 사물함 (기간에 맞게)
+            // 추가 옵션
             const lockerFee = hasLocker ? LOCKER_FEE * selectedPeriod : 0;
+            const registerFee = hasRegister ? REGISTER_FEE : 0;
             
             // 총액
-            const totalPrice = discountedSeatPrice + lockerFee + mentoringFee;
+            const totalPrice = discountedSeatPrice + lockerFee + registerFee;
             
             document.getElementById('total-price').textContent = `₩${totalPrice.toLocaleString()}`;
             
             // 상세 내역
-            let breakdown = `<div class="price-breakdown-item"><span>좌석료 (${selectedStudent.seatType} ${selectedPeriod}개월)</span><span>${basePrice.toLocaleString()}원</span></div>`;
+            let breakdown = `<div class="price-breakdown-item"><span>${selectedTicketType} ${seatPriceLabel} ${selectedPeriod}개월</span><span>${totalSeatPrice.toLocaleString()}원</span></div>`;
             
             if (selectedDiscount > 0) {
                 breakdown += `<div class="price-breakdown-item discount"><span>🏷️ 할인 (${selectedDiscount}%)</span><span>-${discountAmount.toLocaleString()}원</span></div>`;
@@ -1916,8 +2109,8 @@
                 breakdown += `<div class="price-breakdown-item add"><span>🔐 사물함 (${selectedPeriod}개월)</span><span>+${lockerFee.toLocaleString()}원</span></div>`;
             }
             
-            if (mentoringFee > 0) {
-                breakdown += `<div class="price-breakdown-item add"><span>📝 멘토링</span><span>+${mentoringFee.toLocaleString()}원</span></div>`;
+            if (hasRegister) {
+                breakdown += `<div class="price-breakdown-item add"><span>🆕 최초가입비</span><span>+${registerFee.toLocaleString()}원</span></div>`;
             }
             
             breakdown += `<div class="price-breakdown-item total"><span>총 결제금액</span><span>${totalPrice.toLocaleString()}원</span></div>`;
@@ -1927,21 +2120,112 @@
             document.getElementById('kakao-btn').disabled = false;
             document.getElementById('save-btn').disabled = false;
         }
+        
+        function selectTicketType(type) {
+            selectedTicketType = type;
+            document.querySelectorAll('.ticket-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.ticket === type);
+            });
+            
+            // 멘토링 가격 업데이트
+            updateMentoringPrice();
+            calculatePrice();
+        }
+        
+        function updateMentoringPrice() {
+            const seatType = selectedStudent ? normalizeSeatType(selectedStudent.seatType) : '칸막이';
+            let priceDiff = 0;
+            
+            if (seatType === '칸막이') {
+                priceDiff = selectedTicketType === '종일권' ? 40000 : 100000;
+            } else if (seatType === '오픈형') {
+                priceDiff = selectedTicketType === '종일권' ? 0 : 60000;
+            }
+            
+            const priceEl = document.getElementById('mentoring-price');
+            if (priceEl) {
+                priceEl.textContent = priceDiff > 0 ? `+${(priceDiff/10000).toFixed(0)}만원` : '포함안됨';
+            }
+            
+            // 멘토링 옵션 표시/숨김
+            const mentoringOption = document.getElementById('mentoring-option');
+            if (mentoringOption) {
+                if (seatType === '프리미엄' || seatType === '자유석') {
+                    mentoringOption.style.display = 'none';
+                } else {
+                    mentoringOption.style.display = 'flex';
+                }
+            }
+        }
 
         function getTotalPrice() {
             if (!selectedStudent || !selectedPeriod) return 0;
-            const basePrice = priceData[currentFloor][selectedStudent.seatType][selectedPeriod];
+            
+            const startDay = parseInt(document.getElementById('start-day').value);
             const hasLocker = document.getElementById('opt-locker').checked;
-            const mentoringFee = parseInt(document.getElementById('mentoring-fee').value) || 0;
-            const discountedSeatPrice = basePrice - Math.round(basePrice * selectedDiscount / 100);
+            const hasMentoring = document.getElementById('opt-mentoring').checked;
+            const hasRegister = document.getElementById('opt-register').checked;
+            const seatType = normalizeSeatType(selectedStudent.seatType);
+            
+            let seatPrice = 0;
+            
+            if (startDay === 1) {
+                if (seatType === '프리미엄') {
+                    seatPrice = monthlyPrices.종일권['프리미엄'];
+                } else if (hasMentoring && (seatType === '칸막이' || seatType === '오픈형')) {
+                    const key = seatType + '_멘토링';
+                    seatPrice = monthlyPrices[selectedTicketType][key] || monthlyPrices[selectedTicketType][seatType];
+                } else {
+                    seatPrice = monthlyPrices[selectedTicketType][seatType] || 0;
+                }
+            } else {
+                if (currentFloor === 8) {
+                    const tableType = seatType === '오픈형' ? '오픈형' : seatType;
+                    seatPrice = dailyPriceTable_8F[tableType] ? dailyPriceTable_8F[tableType][startDay] : 0;
+                } else {
+                    const tableType = seatType === '오픈형' ? '오픈형' : seatType;
+                    seatPrice = dailyPriceTable_7F[tableType] ? dailyPriceTable_7F[tableType][startDay] : 0;
+                }
+            }
+            
+            let totalSeatPrice = seatPrice;
+            if (selectedPeriod === 2) {
+                let fullMonthPrice;
+                if (seatType === '프리미엄') {
+                    fullMonthPrice = monthlyPrices.종일권['프리미엄'];
+                } else if (hasMentoring) {
+                    const key = seatType + '_멘토링';
+                    fullMonthPrice = monthlyPrices[selectedTicketType][key] || monthlyPrices[selectedTicketType][seatType];
+                } else {
+                    fullMonthPrice = monthlyPrices[selectedTicketType][seatType] || 0;
+                }
+                totalSeatPrice = seatPrice + fullMonthPrice;
+            } else if (selectedPeriod === 3) {
+                let fullMonthPrice;
+                if (seatType === '프리미엄') {
+                    fullMonthPrice = monthlyPrices.종일권['프리미엄'];
+                } else if (hasMentoring) {
+                    const key = seatType + '_멘토링';
+                    fullMonthPrice = monthlyPrices[selectedTicketType][key] || monthlyPrices[selectedTicketType][seatType];
+                } else {
+                    fullMonthPrice = monthlyPrices[selectedTicketType][seatType] || 0;
+                }
+                totalSeatPrice = seatPrice + (fullMonthPrice * 2);
+            }
+            
+            const discountedSeatPrice = totalSeatPrice - Math.round(totalSeatPrice * selectedDiscount / 100);
             const lockerFee = hasLocker ? LOCKER_FEE * selectedPeriod : 0;
-            return discountedSeatPrice + lockerFee + mentoringFee;
+            const registerFee = hasRegister ? REGISTER_FEE : 0;
+            
+            return discountedSeatPrice + lockerFee + registerFee;
         }
 
         function copyPrice() {
             if (!selectedStudent || !selectedPeriod) return;
             const totalPrice = getTotalPrice();
-            let text = `${selectedStudent.name} ${currentFloor}층 ${selectedStudent.seatType} ${selectedPeriod}개월: ${totalPrice.toLocaleString()}원`;
+            const startDay = parseInt(document.getElementById('start-day').value);
+            const seatType = normalizeSeatType(selectedStudent.seatType);
+            let text = `${selectedStudent.name} ${currentFloor}층 ${seatType} ${selectedTicketType} ${selectedPeriod}개월 (${startDay}일 시작): ${totalPrice.toLocaleString()}원`;
             if (selectedDiscount > 0) text += ` (${selectedDiscount}% 할인)`;
             navigator.clipboard.writeText(text);
             showToast('금액이 복사되었습니다');
@@ -1950,25 +2234,30 @@
         function copyKakaoMessage() {
             if (!selectedStudent || !selectedPeriod) return;
             
-            const basePrice = priceData[currentFloor][selectedStudent.seatType][selectedPeriod];
+            const startDay = parseInt(document.getElementById('start-day').value);
             const hasLocker = document.getElementById('opt-locker').checked;
-            const mentoringFee = parseInt(document.getElementById('mentoring-fee').value) || 0;
+            const hasMentoring = document.getElementById('opt-mentoring').checked;
+            const hasRegister = document.getElementById('opt-register').checked;
             const totalPrice = getTotalPrice();
+            const seatType = normalizeSeatType(selectedStudent.seatType);
             
             const today = new Date();
-            const end = new Date(today);
-            end.setMonth(end.getMonth() + selectedPeriod);
+            const startDate = new Date(today.getFullYear(), today.getMonth(), startDay);
+            const endDate = new Date(startDate);
+            endDate.setMonth(endDate.getMonth() + selectedPeriod);
             const fmt = d => `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`;
             
-            let details = `• 좌석료: ${basePrice.toLocaleString()}원`;
+            let details = `• 이용권: ${selectedTicketType}`;
+            details += `\n• 좌석: ${seatType}`;
+            if (hasMentoring) details += ` (멘토링 포함)`;
             if (selectedDiscount > 0) {
-                details += `\n• 할인 (${selectedDiscount}%): -${Math.round(basePrice * selectedDiscount / 100).toLocaleString()}원`;
+                details += `\n• 할인: ${selectedDiscount}%`;
             }
             if (hasLocker) {
-                details += `\n• 사물함 (${selectedPeriod}개월): +${(LOCKER_FEE * selectedPeriod).toLocaleString()}원`;
+                details += `\n• 사물함: +${(LOCKER_FEE * selectedPeriod).toLocaleString()}원`;
             }
-            if (mentoringFee > 0) {
-                details += `\n• 멘토링: +${mentoringFee.toLocaleString()}원`;
+            if (hasRegister) {
+                details += `\n• 최초가입비: +${REGISTER_FEE.toLocaleString()}원`;
             }
             
             const msg = `안녕하세요, 김엄마독서실입니다 📚
@@ -1979,8 +2268,9 @@ ${selectedStudent.name} 학생 이용료 안내드립니다.
 📍 이용 정보
 ━━━━━━━━━━━━━━━
 • 층: ${currentFloor}층
-• 좌석: ${selectedStudent.seatType} ${selectedStudent.seatNumber}번
-• 기간: ${selectedPeriod}개월 (${selectedPeriod * 4}주)
+• 좌석번호: ${selectedStudent.seatNumber}번
+• 기간: ${selectedPeriod}개월
+• 등원일: ${startDay}일
 
 ━━━━━━━━━━━━━━━
 💰 결제 내역
@@ -1992,7 +2282,7 @@ ${details}
 ━━━━━━━━━━━━━━━
 
 📅 이용 기간
-${fmt(today)} ~ ${fmt(end)}
+${fmt(startDate)} ~ ${fmt(endDate)}
 
 감사합니다 🙏`;
             navigator.clipboard.writeText(msg);
@@ -2003,22 +2293,32 @@ ${fmt(today)} ~ ${fmt(end)}
             if (!selectedStudent || !selectedPeriod) return;
             const totalPrice = getTotalPrice();
             const hasLocker = document.getElementById('opt-locker').checked;
-            const mentoringFee = parseInt(document.getElementById('mentoring-fee').value) || 0;
+            const hasMentoring = document.getElementById('opt-mentoring').checked;
+            const hasRegister = document.getElementById('opt-register').checked;
+            const startDay = parseInt(document.getElementById('start-day').value);
             const today = new Date();
-            const end = new Date(today);
-            end.setMonth(end.getMonth() + selectedPeriod);
+            
+            // 시작일 계산 (이번달의 startDay일)
+            const startDate = new Date(today.getFullYear(), today.getMonth(), startDay);
+            const endDate = new Date(startDate);
+            endDate.setMonth(endDate.getMonth() + selectedPeriod);
             
             paymentHistory.unshift({
                 id: Date.now(),
                 name: selectedStudent.name,
                 floor: currentFloor,
-                seatType: selectedStudent.seatType,
+                seatType: normalizeSeatType(selectedStudent.seatType),
                 seatNumber: selectedStudent.seatNumber,
                 period: selectedPeriod,
+                startDay: startDay,
+                ticketType: selectedTicketType,
                 amount: totalPrice,
                 discount: selectedDiscount,
                 locker: hasLocker,
-                mentoring: mentoringFee,
+                mentoring: hasMentoring,
+                register: hasRegister,
+                startDate: startDate.toISOString(),
+                endDate: endDate.toISOString(),
                 createdAt: today.toISOString()
             });
             saveData();
@@ -2029,17 +2329,36 @@ ${fmt(today)} ~ ${fmt(end)}
 
         function renderPriceTable() {
             const container = document.getElementById('price-table');
-            const prices = priceData[currentFloor];
-            let html = '';
-            for (const [type, p] of Object.entries(prices)) {
-                if (currentFloor === 8 && type === '지정석') continue;
-                html += `
-                    <div class="price-table-row"><span class="label">${type} 1개월</span><span class="value">${p[1].toLocaleString()}원</span></div>
-                    <div class="price-table-row"><span class="label">${type} 2개월</span><span class="value">${p[2].toLocaleString()}원</span></div>
-                    <div class="price-table-row"><span class="label">${type} 3개월</span><span class="value">${p[3].toLocaleString()}원</span></div>
-                `;
-            }
-            html += `<div class="price-table-row" style="border-top: 2px solid var(--gray-200); margin-top: 8px; padding-top: 12px;"><span class="label">🔐 사물함</span><span class="value">20,000원/월</span></div>`;
+            
+            let html = `
+            <div style="margin-bottom: 16px;">
+                <div style="font-weight: 600; color: var(--primary); margin-bottom: 8px;">🌞 종일권 (방학)</div>
+                <div class="price-table-row"><span class="label">프리미엄 (N수)</span><span class="value">79만원</span></div>
+                <div class="price-table-row"><span class="label">칸막이</span><span class="value">69만원</span></div>
+                <div class="price-table-row"><span class="label">칸막이 + 멘토링</span><span class="value">73만원</span></div>
+                <div class="price-table-row"><span class="label">오픈형</span><span class="value">63만원</span></div>
+                <div class="price-table-row"><span class="label">자유석</span><span class="value">49만원</span></div>
+            </div>
+            
+            <div style="margin-bottom: 16px;">
+                <div style="font-weight: 600; color: var(--floor-7); margin-bottom: 8px;">🌙 오후권 (학기중)</div>
+                <div class="price-table-row"><span class="label">칸막이</span><span class="value">55만원</span></div>
+                <div class="price-table-row"><span class="label">칸막이 + 멘토링</span><span class="value">65만원</span></div>
+                <div class="price-table-row"><span class="label">오픈형</span><span class="value">53만원</span></div>
+                <div class="price-table-row"><span class="label">오픈형 + 멘토링</span><span class="value">59만원</span></div>
+                <div class="price-table-row"><span class="label">자유석</span><span class="value">39만원</span></div>
+            </div>
+            
+            <div style="padding: 12px; background: var(--gray-50); border-radius: 8px; font-size: 0.8125rem; color: var(--gray-600);">
+                <strong>➕ 추가 옵션</strong><br>
+                • 🆕 최초가입비: 10만원 (1회)<br>
+                • 🔐 사물함: 2만원/월<br>
+                • 🏷️ 할인: 10% / 20%<br><br>
+                <strong>📅 계산 규칙</strong><br>
+                • 12월: 등원일 기준 일할계산<br>
+                • 1월~: 월정액
+            </div>`;
+            
             container.innerHTML = html;
         }
 
@@ -2086,16 +2405,22 @@ ${fmt(today)} ~ ${fmt(end)}
             }
             container.innerHTML = paymentHistory.map((item, i) => {
                 const d = new Date(item.createdAt);
+                const endDate = item.endDate ? new Date(item.endDate) : null;
                 let extras = [];
+                if (item.ticketType) extras.push(item.ticketType);
                 if (item.discount) extras.push(`${item.discount}%할인`);
                 if (item.locker) extras.push('사물함');
                 if (item.mentoring) extras.push('멘토링');
+                if (item.register) extras.push('가입비');
                 const extrasText = extras.length ? ` (${extras.join(', ')})` : '';
+                const startDayText = item.startDay ? `${item.startDay}일 시작` : '';
+                const endDateText = endDate ? ` → ${endDate.getMonth()+1}/${endDate.getDate()} 만료` : '';
                 return `
                     <div class="history-item">
                         <div class="history-info">
                             <h4>${item.name} (${item.floor}층)</h4>
-                            <p>${item.seatType} ${item.seatNumber}번 · ${item.period}개월${extrasText} · ${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}</p>
+                            <p>${item.seatType} ${item.seatNumber}번 · ${item.period}개월${extrasText}</p>
+                            <p style="font-size: 0.75rem; color: var(--gray-400);">${d.getMonth()+1}/${d.getDate()} ${startDayText}${endDateText}</p>
                         </div>
                         <div style="display:flex;align-items:center;">
                             <span class="history-amount">₩${item.amount.toLocaleString()}</span>
@@ -2121,10 +2446,12 @@ ${fmt(today)} ~ ${fmt(end)}
 
         function exportHistory() {
             if (!paymentHistory.length) { showToast('내보낼 내역이 없습니다', 'error'); return; }
-            let csv = '이름,층,좌석유형,좌석번호,기간(개월),금액,할인율,사물함,멘토링,결제일\n';
+            let csv = '이름,층,좌석유형,좌석번호,기간(개월),등원일,이용권,금액,할인율,사물함,멘토링,가입비,결제일,만료일\n';
             paymentHistory.forEach(item => {
                 const d = new Date(item.createdAt);
-                csv += `${item.name},${item.floor}층,${item.seatType},${item.seatNumber},${item.period},${item.amount},${item.discount||0}%,${item.locker?'O':'X'},${item.mentoring||0},${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}\n`;
+                const endDate = item.endDate ? new Date(item.endDate) : null;
+                const endStr = endDate ? `${endDate.getFullYear()}-${endDate.getMonth()+1}-${endDate.getDate()}` : '';
+                csv += `${item.name},${item.floor}층,${item.seatType},${item.seatNumber},${item.period},${item.startDay || 1}일,${item.ticketType || '종일권'},${item.amount},${item.discount||0}%,${item.locker?'O':'X'},${item.mentoring?'O':'X'},${item.register?'O':'X'},${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()},${endStr}\n`;
             });
             const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
