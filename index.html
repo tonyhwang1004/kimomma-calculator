@@ -1226,11 +1226,11 @@
                         </div>
                         <p style="font-size: 0.75rem; color: var(--gray-500); margin-bottom: 12px;">* 방학: 종일권 / 학기중: 오후권 (N수생 제외)</p>
                         
-                        <!-- 멘토링 포함 -->
+                        <!-- 방과후멘토링 포함 -->
                         <div class="option-item" id="mentoring-option" onclick="toggleOption('mentoring')">
                             <input type="checkbox" id="opt-mentoring" onchange="calculatePrice()">
-                            <span class="option-label">📝 멘토링 서비스 포함</span>
-                            <span class="option-value" id="mentoring-price">+4만원</span>
+                            <span class="option-label">📝 방과후멘토링</span>
+                            <span class="option-value" id="mentoring-price">+10만원</span>
                         </div>
 
                         <!-- 사물함 -->
@@ -1457,23 +1457,23 @@
     </div>
 
     <script>
-        // 월 기본 요금표
+        // 월 기본 요금표 (수정됨)
         const monthlyPrices = {
             종일권: {
-                '프리미엄': 790000,      // N수생
+                '프리미엄': 690000,      // 69만원으로 변경
                 '칸막이': 690000,
-                '칸막이_멘토링': 730000,
                 '오픈형': 630000,
-                '자유석': 490000
+                '자유석': 530000          // 53만원으로 변경
             },
             오후권: {
                 '칸막이': 550000,
-                '칸막이_멘토링': 650000,
-                '오픈형': 530000,
-                '오픈형_멘토링': 590000,
+                '오픈형': 490000,         // 49만원으로 변경
                 '자유석': 390000
             }
         };
+
+        // 방과후멘토링 비용 (수정됨)
+        const MENTORING_FEE = 100000;  // 10만원 고정
 
         // 8층 일할계산 요금표 (12월 기준, 사물함 제외)
         const dailyPriceTable_8F = {
@@ -1726,7 +1726,7 @@
             updateStats();
             renderHistory();
             updateModalSeatTypes();
-            checkExpiringPayments(); // 만료 예정 체크 추가
+            checkExpiringPayments();
             
             const savedTheme = localStorage.getItem('kimomma_theme');
             if (savedTheme === 'dark') {
@@ -1743,7 +1743,6 @@
             paymentHistory.forEach(payment => {
                 let endDate;
                 
-                // endDate가 있으면 사용, 없으면 계산
                 if (payment.endDate) {
                     endDate = new Date(payment.endDate);
                 } else {
@@ -1754,7 +1753,6 @@
                 
                 const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
                 
-                // 만료됨, 오늘, 7일 이내
                 if (daysLeft <= 7) {
                     expiringList.push({
                         ...payment,
@@ -1764,7 +1762,6 @@
                 }
             });
             
-            // 중복 제거 (같은 학생의 최신 결제만)
             const uniqueExpiring = [];
             const seenNames = new Set();
             expiringList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -1777,7 +1774,6 @@
                 }
             }
             
-            // 만료일 순 정렬
             uniqueExpiring.sort((a, b) => a.daysLeft - b.daysLeft);
             
             renderExpiringList(uniqueExpiring);
@@ -1957,7 +1953,6 @@
                 btn.classList.toggle('active', btn.dataset.ticket === '종일권');
             });
             selectDiscount(0);
-            updateMentoringPrice();
             document.getElementById('total-price').textContent = '₩0';
             document.getElementById('price-breakdown').innerHTML = '';
             document.getElementById('copy-btn').disabled = true;
@@ -2035,10 +2030,6 @@
                 if (seatType === '프리미엄') {
                     seatPrice = monthlyPrices.종일권['프리미엄'];
                     seatPriceLabel = '프리미엄';
-                } else if (hasMentoring && (seatType === '칸막이' || seatType === '오픈형')) {
-                    const key = seatType + '_멘토링';
-                    seatPrice = monthlyPrices[selectedTicketType][key] || monthlyPrices[selectedTicketType][seatType];
-                    seatPriceLabel = `${seatType} (멘토링)`;
                 } else {
                     seatPrice = monthlyPrices[selectedTicketType][seatType] || 0;
                     seatPriceLabel = seatType;
@@ -2063,9 +2054,6 @@
                 let fullMonthPrice;
                 if (seatType === '프리미엄') {
                     fullMonthPrice = monthlyPrices.종일권['프리미엄'];
-                } else if (hasMentoring) {
-                    const key = seatType + '_멘토링';
-                    fullMonthPrice = monthlyPrices[selectedTicketType][key] || monthlyPrices[selectedTicketType][seatType];
                 } else {
                     fullMonthPrice = monthlyPrices[selectedTicketType][seatType] || 0;
                 }
@@ -2075,9 +2063,6 @@
                 let fullMonthPrice;
                 if (seatType === '프리미엄') {
                     fullMonthPrice = monthlyPrices.종일권['프리미엄'];
-                } else if (hasMentoring) {
-                    const key = seatType + '_멘토링';
-                    fullMonthPrice = monthlyPrices[selectedTicketType][key] || monthlyPrices[selectedTicketType][seatType];
                 } else {
                     fullMonthPrice = monthlyPrices[selectedTicketType][seatType] || 0;
                 }
@@ -2090,10 +2075,11 @@
             
             // 추가 옵션
             const lockerFee = hasLocker ? LOCKER_FEE * selectedPeriod : 0;
+            const mentoringFee = hasMentoring ? MENTORING_FEE * selectedPeriod : 0;
             const registerFee = hasRegister ? REGISTER_FEE : 0;
             
             // 총액
-            const totalPrice = discountedSeatPrice + lockerFee + registerFee;
+            const totalPrice = discountedSeatPrice + lockerFee + mentoringFee + registerFee;
             
             document.getElementById('total-price').textContent = `₩${totalPrice.toLocaleString()}`;
             
@@ -2102,6 +2088,10 @@
             
             if (selectedDiscount > 0) {
                 breakdown += `<div class="price-breakdown-item discount"><span>🏷️ 할인 (${selectedDiscount}%)</span><span>-${discountAmount.toLocaleString()}원</span></div>`;
+            }
+            
+            if (hasMentoring) {
+                breakdown += `<div class="price-breakdown-item add"><span>📝 방과후멘토링 (${selectedPeriod}개월)</span><span>+${mentoringFee.toLocaleString()}원</span></div>`;
             }
             
             if (hasLocker) {
@@ -2125,36 +2115,7 @@
             document.querySelectorAll('.ticket-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.ticket === type);
             });
-            
-            // 멘토링 가격 업데이트
-            updateMentoringPrice();
             calculatePrice();
-        }
-        
-        function updateMentoringPrice() {
-            const seatType = selectedStudent ? normalizeSeatType(selectedStudent.seatType) : '칸막이';
-            let priceDiff = 0;
-            
-            if (seatType === '칸막이') {
-                priceDiff = selectedTicketType === '종일권' ? 40000 : 100000;
-            } else if (seatType === '오픈형') {
-                priceDiff = selectedTicketType === '종일권' ? 0 : 60000;
-            }
-            
-            const priceEl = document.getElementById('mentoring-price');
-            if (priceEl) {
-                priceEl.textContent = priceDiff > 0 ? `+${(priceDiff/10000).toFixed(0)}만원` : '포함안됨';
-            }
-            
-            // 멘토링 옵션 표시/숨김
-            const mentoringOption = document.getElementById('mentoring-option');
-            if (mentoringOption) {
-                if (seatType === '프리미엄' || seatType === '자유석') {
-                    mentoringOption.style.display = 'none';
-                } else {
-                    mentoringOption.style.display = 'flex';
-                }
-            }
         }
 
         function getTotalPrice() {
@@ -2171,9 +2132,6 @@
             if (startDay === 1) {
                 if (seatType === '프리미엄') {
                     seatPrice = monthlyPrices.종일권['프리미엄'];
-                } else if (hasMentoring && (seatType === '칸막이' || seatType === '오픈형')) {
-                    const key = seatType + '_멘토링';
-                    seatPrice = monthlyPrices[selectedTicketType][key] || monthlyPrices[selectedTicketType][seatType];
                 } else {
                     seatPrice = monthlyPrices[selectedTicketType][seatType] || 0;
                 }
@@ -2192,9 +2150,6 @@
                 let fullMonthPrice;
                 if (seatType === '프리미엄') {
                     fullMonthPrice = monthlyPrices.종일권['프리미엄'];
-                } else if (hasMentoring) {
-                    const key = seatType + '_멘토링';
-                    fullMonthPrice = monthlyPrices[selectedTicketType][key] || monthlyPrices[selectedTicketType][seatType];
                 } else {
                     fullMonthPrice = monthlyPrices[selectedTicketType][seatType] || 0;
                 }
@@ -2203,9 +2158,6 @@
                 let fullMonthPrice;
                 if (seatType === '프리미엄') {
                     fullMonthPrice = monthlyPrices.종일권['프리미엄'];
-                } else if (hasMentoring) {
-                    const key = seatType + '_멘토링';
-                    fullMonthPrice = monthlyPrices[selectedTicketType][key] || monthlyPrices[selectedTicketType][seatType];
                 } else {
                     fullMonthPrice = monthlyPrices[selectedTicketType][seatType] || 0;
                 }
@@ -2214,9 +2166,10 @@
             
             const discountedSeatPrice = totalSeatPrice - Math.round(totalSeatPrice * selectedDiscount / 100);
             const lockerFee = hasLocker ? LOCKER_FEE * selectedPeriod : 0;
+            const mentoringFee = hasMentoring ? MENTORING_FEE * selectedPeriod : 0;
             const registerFee = hasRegister ? REGISTER_FEE : 0;
             
-            return discountedSeatPrice + lockerFee + registerFee;
+            return discountedSeatPrice + lockerFee + mentoringFee + registerFee;
         }
 
         function copyPrice() {
@@ -2248,9 +2201,11 @@
             
             let details = `• 이용권: ${selectedTicketType}`;
             details += `\n• 좌석: ${seatType}`;
-            if (hasMentoring) details += ` (멘토링 포함)`;
             if (selectedDiscount > 0) {
                 details += `\n• 할인: ${selectedDiscount}%`;
+            }
+            if (hasMentoring) {
+                details += `\n• 방과후멘토링: +${(MENTORING_FEE * selectedPeriod).toLocaleString()}원`;
             }
             if (hasLocker) {
                 details += `\n• 사물함: +${(LOCKER_FEE * selectedPeriod).toLocaleString()}원`;
@@ -2297,7 +2252,6 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
             const startDay = parseInt(document.getElementById('start-day').value);
             const today = new Date();
             
-            // 시작일 계산 (이번달의 startDay일)
             const startDate = new Date(today.getFullYear(), today.getMonth(), startDay);
             const endDate = new Date(startDate);
             endDate.setMonth(endDate.getMonth() + selectedPeriod);
@@ -2323,7 +2277,7 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
             saveData();
             showToast('결제 내역이 저장되었습니다', 'success');
             updateStats();
-            checkExpiringPayments(); // 만료 예정 다시 체크
+            checkExpiringPayments();
         }
 
         function renderPriceTable() {
@@ -2332,24 +2286,22 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
             let html = `
             <div style="margin-bottom: 16px;">
                 <div style="font-weight: 600; color: var(--primary); margin-bottom: 8px;">🌞 종일권 (방학)</div>
-                <div class="price-table-row"><span class="label">프리미엄 (N수)</span><span class="value">79만원</span></div>
+                <div class="price-table-row"><span class="label">프리미엄 (N수)</span><span class="value">69만원</span></div>
                 <div class="price-table-row"><span class="label">칸막이</span><span class="value">69만원</span></div>
-                <div class="price-table-row"><span class="label">칸막이 + 멘토링</span><span class="value">73만원</span></div>
                 <div class="price-table-row"><span class="label">오픈형</span><span class="value">63만원</span></div>
-                <div class="price-table-row"><span class="label">자유석</span><span class="value">49만원</span></div>
+                <div class="price-table-row"><span class="label">자유석</span><span class="value">53만원</span></div>
             </div>
             
             <div style="margin-bottom: 16px;">
                 <div style="font-weight: 600; color: var(--floor-7); margin-bottom: 8px;">🌙 오후권 (학기중)</div>
                 <div class="price-table-row"><span class="label">칸막이</span><span class="value">55만원</span></div>
-                <div class="price-table-row"><span class="label">칸막이 + 멘토링</span><span class="value">65만원</span></div>
-                <div class="price-table-row"><span class="label">오픈형</span><span class="value">53만원</span></div>
-                <div class="price-table-row"><span class="label">오픈형 + 멘토링</span><span class="value">59만원</span></div>
+                <div class="price-table-row"><span class="label">오픈형</span><span class="value">49만원</span></div>
                 <div class="price-table-row"><span class="label">자유석</span><span class="value">39만원</span></div>
             </div>
             
             <div style="padding: 12px; background: var(--gray-50); border-radius: 8px; font-size: 0.8125rem; color: var(--gray-600);">
                 <strong>➕ 추가 옵션</strong><br>
+                • 📝 방과후멘토링: 10만원/월<br>
                 • 🆕 최초가입비: 10만원 (1회)<br>
                 • 🔐 사물함: 2만원/월<br>
                 • 🏷️ 할인: 10% / 20%<br><br>
@@ -2381,7 +2333,6 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
             const container = document.getElementById(containerId);
             const types = seatTypes[floor].filter(t => t !== '전체');
             
-            // 좌석 유형별 카운트 (매핑 적용)
             const counts = {};
             types.forEach(type => counts[type] = 0);
             
@@ -2422,8 +2373,8 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
                 let extras = [];
                 if (item.ticketType) extras.push(item.ticketType);
                 if (item.discount) extras.push(`${item.discount}%할인`);
-                if (item.locker) extras.push('사물함');
                 if (item.mentoring) extras.push('멘토링');
+                if (item.locker) extras.push('사물함');
                 if (item.register) extras.push('가입비');
                 const extrasText = extras.length ? ` (${extras.join(', ')})` : '';
                 const startDayText = item.startDay ? `${item.startDay}일 시작` : '';
@@ -2453,7 +2404,7 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
             saveData();
             renderHistory();
             updateStats();
-            checkExpiringPayments(); // 만료 예정 다시 체크
+            checkExpiringPayments();
             showToast('내역이 삭제되었습니다');
         }
 
@@ -2503,13 +2454,11 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
                 try {
                     const data = JSON.parse(e.target.result);
                     
-                    // 데이터 유효성 검사
                     if (!data.students || !data.students[7] || !data.students[8]) {
                         showToast('올바른 백업 파일이 아닙니다', 'error');
                         return;
                     }
                     
-                    // 확인 메시지
                     const studentCount = data.students[7].length + data.students[8].length;
                     const historyCount = data.paymentHistory ? data.paymentHistory.length : 0;
                     
@@ -2529,7 +2478,7 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
                         renderHistory();
                         updateStats();
                         renderRecentStudents();
-                        checkExpiringPayments(); // 만료 예정 체크 추가
+                        checkExpiringPayments();
                         
                         showToast(`복원 완료! (학생 ${studentCount}명, 내역 ${historyCount}건)`, 'success');
                     }
@@ -2539,7 +2488,7 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
                 }
             };
             reader.readAsText(file);
-            event.target.value = ''; // 같은 파일 다시 선택 가능하도록
+            event.target.value = '';
         }
 
         function openAddModal() {
