@@ -1228,11 +1228,32 @@
                         
                         <!-- 올케어 선택 -->
                         <div class="options-title" style="margin-top: 4px;">🏥 올케어 선택</div>
-                        <div class="discount-btn-group" style="flex-wrap: wrap;">
-                            <button class="discount-btn allcare-btn active" data-allcare="0" onclick="selectAllcare(0)">없음</button>
-                            <button class="discount-btn allcare-btn" data-allcare="1" onclick="selectAllcare(1)">6만원</button>
-                            <button class="discount-btn allcare-btn" data-allcare="2" onclick="selectAllcare(2)">10만원</button>
-                            <button class="discount-btn allcare-btn" data-allcare="3" onclick="selectAllcare(3)">20만원</button>
+                        <div class="option-input-group">
+                            <label>올케어 금액</label>
+                            <select id="allcare-select" onchange="selectAllcare(this.value)" style="max-width: 150px;">
+                                <option value="0">없음</option>
+                                <option value="10000">1만원</option>
+                                <option value="20000">2만원</option>
+                                <option value="30000">3만원</option>
+                                <option value="40000">4만원</option>
+                                <option value="50000">5만원</option>
+                                <option value="60000">6만원</option>
+                                <option value="70000">7만원</option>
+                                <option value="80000">8만원</option>
+                                <option value="90000">9만원</option>
+                                <option value="100000">10만원</option>
+                                <option value="110000">11만원</option>
+                                <option value="120000">12만원</option>
+                                <option value="130000">13만원</option>
+                                <option value="140000">14만원</option>
+                                <option value="150000">15만원</option>
+                                <option value="160000">16만원</option>
+                                <option value="170000">17만원</option>
+                                <option value="180000">18만원</option>
+                                <option value="190000">19만원</option>
+                                <option value="200000">20만원</option>
+                            </select>
+                            <span style="font-size: 0.8rem; color: var(--gray-500);">/월</span>
                         </div>
 
                         <!-- 사물함 -->
@@ -1474,12 +1495,20 @@
             }
         };
 
-        // 올케어 비용 옵션
-        const ALLCARE_OPTIONS = {
-            0: 0,        // 없음
-            1: 60000,    // 6만원
-            2: 100000,   // 10만원
-            3: 200000    // 20만원
+        // 일당 요금표 (30일 기준)
+        const dailyRates = {
+            종일권: {
+                '프리미엄': 23000,
+                '칸막이': 23000,
+                '오픈형': 21000,
+                '자유석': 17700
+            },
+            오후권: {
+                '프리미엄': 18500,
+                '칸막이': 18500,
+                '오픈형': 16400,
+                '자유석': 13000
+            }
         };
 
         // 8층 일할계산 요금표 (12월 기준, 사물함 제외)
@@ -1960,9 +1989,7 @@
             document.querySelectorAll('.ticket-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.ticket === '종일권');
             });
-            document.querySelectorAll('.allcare-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.allcare === '0');
-            });
+            document.getElementById('allcare-select').value = '0';
             selectDiscount(0);
             document.getElementById('total-price').textContent = '₩0';
             document.getElementById('price-breakdown').innerHTML = '';
@@ -2023,11 +2050,8 @@
             calculatePrice();
         }
 
-        function selectAllcare(level) {
-            selectedAllcare = level;
-            document.querySelectorAll('.allcare-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.allcare == level);
-            });
+        function selectAllcare(value) {
+            selectedAllcare = parseInt(value);
             calculatePrice();
         }
 
@@ -2039,52 +2063,45 @@
             const hasRegister = document.getElementById('opt-register').checked;
             const seatType = normalizeSeatType(selectedStudent.seatType);
             
-            let seatPrice = 0;
-            let seatPriceLabel = '';
+            // 현재 날짜 기준으로 시작월 계산
+            const today = new Date();
+            const startMonth = today.getMonth(); // 0-11
+            const startYear = today.getFullYear();
             
-            // 12월 일할계산 vs 1월~ 월정액
+            // 해당 월의 마지막 날 구하기
+            const lastDayOfMonth = new Date(startYear, startMonth + 1, 0).getDate();
+            
+            // 첫 달 남은 일수 계산
+            const remainingDays = lastDayOfMonth - startDay + 1;
+            
+            // 일당 요금 가져오기
+            const ticketType = seatType === '프리미엄' ? '종일권' : selectedTicketType;
+            const dailyRate = dailyRates[ticketType][seatType] || 0;
+            
+            // 월 요금 (일당 x 30)
+            const monthlyPrice = dailyRate * 30;
+            
+            let totalSeatPrice = 0;
+            let priceDetail = '';
+            
             if (startDay === 1) {
                 // 1일 시작 = 월정액
-                if (seatType === '프리미엄') {
-                    seatPrice = monthlyPrices.종일권['프리미엄'];
-                    seatPriceLabel = '프리미엄';
-                } else {
-                    seatPrice = monthlyPrices[selectedTicketType][seatType] || 0;
-                    seatPriceLabel = seatType;
-                }
+                totalSeatPrice = monthlyPrice * selectedPeriod;
+                priceDetail = `${selectedPeriod}개월`;
             } else {
-                // 일할계산 (12월)
-                if (currentFloor === 8) {
-                    const tableType = seatType === '오픈형' ? '오픈형' : seatType;
-                    seatPrice = dailyPriceTable_8F[tableType] ? dailyPriceTable_8F[tableType][startDay] : 0;
-                } else {
-                    // 7층 (19일~)
-                    const tableType = seatType === '오픈형' ? '오픈형' : seatType;
-                    seatPrice = dailyPriceTable_7F[tableType] ? dailyPriceTable_7F[tableType][startDay] : 0;
+                // 첫 달은 일할계산
+                const firstMonthPrice = dailyRate * remainingDays;
+                
+                if (selectedPeriod === 1) {
+                    totalSeatPrice = firstMonthPrice;
+                    priceDetail = `${remainingDays}일`;
+                } else if (selectedPeriod === 2) {
+                    totalSeatPrice = firstMonthPrice + monthlyPrice;
+                    priceDetail = `${remainingDays}일 + 1개월`;
+                } else if (selectedPeriod === 3) {
+                    totalSeatPrice = firstMonthPrice + (monthlyPrice * 2);
+                    priceDetail = `${remainingDays}일 + 2개월`;
                 }
-                seatPriceLabel = `${seatType} (${startDay}일 시작)`;
-            }
-            
-            // 기간에 따른 계산
-            let totalSeatPrice = seatPrice;
-            if (selectedPeriod === 2) {
-                // 2개월: 일할 + 다음달 전체
-                let fullMonthPrice;
-                if (seatType === '프리미엄') {
-                    fullMonthPrice = monthlyPrices.종일권['프리미엄'];
-                } else {
-                    fullMonthPrice = monthlyPrices[selectedTicketType][seatType] || 0;
-                }
-                totalSeatPrice = seatPrice + fullMonthPrice;
-            } else if (selectedPeriod === 3) {
-                // 3개월
-                let fullMonthPrice;
-                if (seatType === '프리미엄') {
-                    fullMonthPrice = monthlyPrices.종일권['프리미엄'];
-                } else {
-                    fullMonthPrice = monthlyPrices[selectedTicketType][seatType] || 0;
-                }
-                totalSeatPrice = seatPrice + (fullMonthPrice * 2);
             }
             
             // 할인 적용 (좌석요금에만)
@@ -2093,7 +2110,7 @@
             
             // 추가 옵션
             const lockerFee = hasLocker ? LOCKER_FEE * selectedPeriod : 0;
-            const allcareFee = ALLCARE_OPTIONS[selectedAllcare] * selectedPeriod;
+            const allcareFee = selectedAllcare * selectedPeriod;
             const registerFee = hasRegister ? REGISTER_FEE : 0;
             
             // 총액
@@ -2102,15 +2119,15 @@
             document.getElementById('total-price').textContent = `₩${totalPrice.toLocaleString()}`;
             
             // 상세 내역
-            let breakdown = `<div class="price-breakdown-item"><span>${selectedTicketType} ${seatPriceLabel} ${selectedPeriod}개월</span><span>${totalSeatPrice.toLocaleString()}원</span></div>`;
+            let breakdown = `<div class="price-breakdown-item"><span>${ticketType} ${seatType} (${priceDetail})</span><span>${totalSeatPrice.toLocaleString()}원</span></div>`;
+            breakdown += `<div class="price-breakdown-item" style="font-size:0.75rem;color:var(--gray-500);"><span>일당 ${dailyRate.toLocaleString()}원</span><span></span></div>`;
             
             if (selectedDiscount > 0) {
                 breakdown += `<div class="price-breakdown-item discount"><span>🏷️ 할인 (${selectedDiscount}%)</span><span>-${discountAmount.toLocaleString()}원</span></div>`;
             }
             
             if (selectedAllcare > 0) {
-                const allcareLabels = ['', '6만원', '10만원', '20만원'];
-                breakdown += `<div class="price-breakdown-item add"><span>🏥 올케어 ${allcareLabels[selectedAllcare]} (${selectedPeriod}개월)</span><span>+${allcareFee.toLocaleString()}원</span></div>`;
+                breakdown += `<div class="price-breakdown-item add"><span>🏥 올케어 ${(selectedAllcare/10000).toFixed(0)}만원 (${selectedPeriod}개월)</span><span>+${allcareFee.toLocaleString()}원</span></div>`;
             }
             
             if (hasLocker) {
@@ -2145,46 +2162,34 @@
             const hasRegister = document.getElementById('opt-register').checked;
             const seatType = normalizeSeatType(selectedStudent.seatType);
             
-            let seatPrice = 0;
+            const today = new Date();
+            const startMonth = today.getMonth();
+            const startYear = today.getFullYear();
+            const lastDayOfMonth = new Date(startYear, startMonth + 1, 0).getDate();
+            const remainingDays = lastDayOfMonth - startDay + 1;
+            
+            const ticketType = seatType === '프리미엄' ? '종일권' : selectedTicketType;
+            const dailyRate = dailyRates[ticketType][seatType] || 0;
+            const monthlyPrice = dailyRate * 30;
+            
+            let totalSeatPrice = 0;
             
             if (startDay === 1) {
-                if (seatType === '프리미엄') {
-                    seatPrice = monthlyPrices.종일권['프리미엄'];
-                } else {
-                    seatPrice = monthlyPrices[selectedTicketType][seatType] || 0;
-                }
+                totalSeatPrice = monthlyPrice * selectedPeriod;
             } else {
-                if (currentFloor === 8) {
-                    const tableType = seatType === '오픈형' ? '오픈형' : seatType;
-                    seatPrice = dailyPriceTable_8F[tableType] ? dailyPriceTable_8F[tableType][startDay] : 0;
-                } else {
-                    const tableType = seatType === '오픈형' ? '오픈형' : seatType;
-                    seatPrice = dailyPriceTable_7F[tableType] ? dailyPriceTable_7F[tableType][startDay] : 0;
+                const firstMonthPrice = dailyRate * remainingDays;
+                if (selectedPeriod === 1) {
+                    totalSeatPrice = firstMonthPrice;
+                } else if (selectedPeriod === 2) {
+                    totalSeatPrice = firstMonthPrice + monthlyPrice;
+                } else if (selectedPeriod === 3) {
+                    totalSeatPrice = firstMonthPrice + (monthlyPrice * 2);
                 }
-            }
-            
-            let totalSeatPrice = seatPrice;
-            if (selectedPeriod === 2) {
-                let fullMonthPrice;
-                if (seatType === '프리미엄') {
-                    fullMonthPrice = monthlyPrices.종일권['프리미엄'];
-                } else {
-                    fullMonthPrice = monthlyPrices[selectedTicketType][seatType] || 0;
-                }
-                totalSeatPrice = seatPrice + fullMonthPrice;
-            } else if (selectedPeriod === 3) {
-                let fullMonthPrice;
-                if (seatType === '프리미엄') {
-                    fullMonthPrice = monthlyPrices.종일권['프리미엄'];
-                } else {
-                    fullMonthPrice = monthlyPrices[selectedTicketType][seatType] || 0;
-                }
-                totalSeatPrice = seatPrice + (fullMonthPrice * 2);
             }
             
             const discountedSeatPrice = totalSeatPrice - Math.round(totalSeatPrice * selectedDiscount / 100);
             const lockerFee = hasLocker ? LOCKER_FEE * selectedPeriod : 0;
-            const allcareFee = ALLCARE_OPTIONS[selectedAllcare] * selectedPeriod;
+            const allcareFee = selectedAllcare * selectedPeriod;
             const registerFee = hasRegister ? REGISTER_FEE : 0;
             
             return discountedSeatPrice + lockerFee + allcareFee + registerFee;
@@ -2194,9 +2199,84 @@
             if (!selectedStudent || !selectedPeriod) return;
             const totalPrice = getTotalPrice();
             const startDay = parseInt(document.getElementById('start-day').value);
+            const hasLocker = document.getElementById('opt-locker').checked;
+            const hasRegister = document.getElementById('opt-register').checked;
             const seatType = normalizeSeatType(selectedStudent.seatType);
-            let text = `${selectedStudent.name} ${currentFloor}층 ${seatType} ${selectedTicketType} ${selectedPeriod}개월 (${startDay}일 시작): ${totalPrice.toLocaleString()}원`;
-            if (selectedDiscount > 0) text += ` (${selectedDiscount}% 할인)`;
+            
+            const today = new Date();
+            const startMonth = today.getMonth();
+            const startYear = today.getFullYear();
+            const lastDayOfMonth = new Date(startYear, startMonth + 1, 0).getDate();
+            const remainingDays = lastDayOfMonth - startDay + 1;
+            
+            const ticketType = seatType === '프리미엄' ? '종일권' : selectedTicketType;
+            const dailyRate = dailyRates[ticketType][seatType] || 0;
+            const monthlyPrice = dailyRate * 30;
+            
+            // 날짜 포맷
+            const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+            const startMonthName = monthNames[startMonth];
+            
+            let periodText = '';
+            let seatPrice = 0;
+            
+            if (startDay === 1) {
+                // 1일 시작
+                if (selectedPeriod === 1) {
+                    const endMonth = (startMonth + 1) % 12;
+                    const endYear = startMonth === 11 ? startYear + 1 : startYear;
+                    const endLastDay = new Date(endYear, endMonth, 0).getDate();
+                    periodText = `${startMonthName}1일에서 ${startMonthName}${endLastDay}일까지 1개월`;
+                    seatPrice = monthlyPrice;
+                } else {
+                    const endMonthIdx = (startMonth + selectedPeriod) % 12;
+                    periodText = `${startMonthName}1일부터 ${selectedPeriod}개월`;
+                    seatPrice = monthlyPrice * selectedPeriod;
+                }
+            } else {
+                // 일할계산
+                const firstMonthPrice = dailyRate * remainingDays;
+                if (selectedPeriod === 1) {
+                    periodText = `${startMonthName}${startDay}일에서 ${startMonthName}${lastDayOfMonth}일까지 총 ${remainingDays}일 1일 ${dailyRate.toLocaleString()}원`;
+                    seatPrice = firstMonthPrice;
+                } else if (selectedPeriod === 2) {
+                    periodText = `${startMonthName}${startDay}일부터 ${remainingDays}일 + 1개월 (1일 ${dailyRate.toLocaleString()}원)`;
+                    seatPrice = firstMonthPrice + monthlyPrice;
+                } else {
+                    periodText = `${startMonthName}${startDay}일부터 ${remainingDays}일 + 2개월 (1일 ${dailyRate.toLocaleString()}원)`;
+                    seatPrice = firstMonthPrice + (monthlyPrice * 2);
+                }
+            }
+            
+            // 기본 메시지
+            let text = `${selectedStudent.name}학생은 ${currentFloor}층 ${seatType} ${ticketType} ${periodText} 좌석료 ${seatPrice.toLocaleString()}원`;
+            
+            // 할인
+            if (selectedDiscount > 0) {
+                const discountAmount = Math.round(seatPrice * selectedDiscount / 100);
+                text += ` 할인${selectedDiscount}% -${discountAmount.toLocaleString()}원`;
+            }
+            
+            // 옵션들
+            let options = [];
+            if (selectedAllcare > 0) {
+                const allcareFee = selectedAllcare * selectedPeriod;
+                options.push(`올케어 ${(selectedAllcare/10000).toFixed(0)}만원x${selectedPeriod}개월 +${allcareFee.toLocaleString()}원`);
+            }
+            if (hasLocker) {
+                const lockerFee = LOCKER_FEE * selectedPeriod;
+                options.push(`사물함 +${lockerFee.toLocaleString()}원`);
+            }
+            if (hasRegister) {
+                options.push(`최초가입비 +${REGISTER_FEE.toLocaleString()}원`);
+            }
+            
+            if (options.length > 0) {
+                text += ' ' + options.join(' ');
+            }
+            
+            text += ` 총 ${totalPrice.toLocaleString()}원입니다.`;
+            
             navigator.clipboard.writeText(text);
             showToast('금액이 복사되었습니다');
         }
@@ -2211,20 +2291,31 @@
             const seatType = normalizeSeatType(selectedStudent.seatType);
             
             const today = new Date();
-            const startDate = new Date(today.getFullYear(), today.getMonth(), startDay);
+            const startMonth = today.getMonth();
+            const startYear = today.getFullYear();
+            const lastDayOfMonth = new Date(startYear, startMonth + 1, 0).getDate();
+            const remainingDays = lastDayOfMonth - startDay + 1;
+            
+            const ticketType = seatType === '프리미엄' ? '종일권' : selectedTicketType;
+            const dailyRate = dailyRates[ticketType][seatType] || 0;
+            
+            const startDate = new Date(startYear, startMonth, startDay);
             const endDate = new Date(startDate);
             endDate.setMonth(endDate.getMonth() + selectedPeriod);
             const fmt = d => `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`;
             
-            let details = `• 이용권: ${selectedTicketType}`;
+            let details = `• 이용권: ${ticketType}`;
             details += `\n• 좌석: ${seatType}`;
+            details += `\n• 일당: ${dailyRate.toLocaleString()}원`;
+            if (startDay !== 1) {
+                details += `\n• 첫 달: ${remainingDays}일 (${(dailyRate * remainingDays).toLocaleString()}원)`;
+            }
             if (selectedDiscount > 0) {
                 details += `\n• 할인: ${selectedDiscount}%`;
             }
             if (selectedAllcare > 0) {
-                const allcareLabels = ['', '6만원', '10만원', '20만원'];
-                const allcareFee = ALLCARE_OPTIONS[selectedAllcare] * selectedPeriod;
-                details += `\n• 올케어 ${allcareLabels[selectedAllcare]}: +${allcareFee.toLocaleString()}원`;
+                const allcareFee = selectedAllcare * selectedPeriod;
+                details += `\n• 올케어 ${(selectedAllcare/10000).toFixed(0)}만원: +${allcareFee.toLocaleString()}원`;
             }
             if (hasLocker) {
                 details += `\n• 사물함: +${(LOCKER_FEE * selectedPeriod).toLocaleString()}원`;
@@ -2268,6 +2359,8 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
             const hasLocker = document.getElementById('opt-locker').checked;
             const hasRegister = document.getElementById('opt-register').checked;
             const startDay = parseInt(document.getElementById('start-day').value);
+            const seatType = normalizeSeatType(selectedStudent.seatType);
+            const ticketType = seatType === '프리미엄' ? '종일권' : selectedTicketType;
             const today = new Date();
             
             const startDate = new Date(today.getFullYear(), today.getMonth(), startDay);
@@ -2278,11 +2371,11 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
                 id: Date.now(),
                 name: selectedStudent.name,
                 floor: currentFloor,
-                seatType: normalizeSeatType(selectedStudent.seatType),
+                seatType: seatType,
                 seatNumber: selectedStudent.seatNumber,
                 period: selectedPeriod,
                 startDay: startDay,
-                ticketType: selectedTicketType,
+                ticketType: ticketType,
                 amount: totalPrice,
                 discount: selectedDiscount,
                 locker: hasLocker,
@@ -2303,29 +2396,28 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
             
             let html = `
             <div style="margin-bottom: 16px;">
-                <div style="font-weight: 600; color: var(--primary); margin-bottom: 8px;">🌞 종일권 (방학)</div>
-                <div class="price-table-row"><span class="label">프리미엄 (N수)</span><span class="value">69만원</span></div>
-                <div class="price-table-row"><span class="label">칸막이</span><span class="value">69만원</span></div>
-                <div class="price-table-row"><span class="label">오픈형</span><span class="value">63만원</span></div>
-                <div class="price-table-row"><span class="label">자유석</span><span class="value">53만원</span></div>
+                <div style="font-weight: 600; color: var(--primary); margin-bottom: 8px;">🌞 종일권 (방학) - 일당 요금</div>
+                <div class="price-table-row"><span class="label">프리미엄/칸막이</span><span class="value">23,000원/일 (월 69만원)</span></div>
+                <div class="price-table-row"><span class="label">오픈형</span><span class="value">21,000원/일 (월 63만원)</span></div>
+                <div class="price-table-row"><span class="label">자유석</span><span class="value">17,700원/일 (월 53.1만원)</span></div>
             </div>
             
             <div style="margin-bottom: 16px;">
-                <div style="font-weight: 600; color: var(--floor-7); margin-bottom: 8px;">🌙 오후권 (학기중)</div>
-                <div class="price-table-row"><span class="label">칸막이</span><span class="value">55만원</span></div>
-                <div class="price-table-row"><span class="label">오픈형</span><span class="value">49만원</span></div>
-                <div class="price-table-row"><span class="label">자유석</span><span class="value">39만원</span></div>
+                <div style="font-weight: 600; color: var(--floor-7); margin-bottom: 8px;">🌙 오후권 (학기중) - 일당 요금</div>
+                <div class="price-table-row"><span class="label">프리미엄/칸막이</span><span class="value">18,500원/일 (월 55.5만원)</span></div>
+                <div class="price-table-row"><span class="label">오픈형</span><span class="value">16,400원/일 (월 49.2만원)</span></div>
+                <div class="price-table-row"><span class="label">자유석</span><span class="value">13,000원/일 (월 39만원)</span></div>
             </div>
             
             <div style="padding: 12px; background: var(--gray-50); border-radius: 8px; font-size: 0.8125rem; color: var(--gray-600);">
+                <strong>📅 계산 방식</strong><br>
+                • 1일 시작: 월정액 (일당 × 30일)<br>
+                • 중간 등원: 해당월 남은 일수 × 일당<br><br>
                 <strong>➕ 추가 옵션</strong><br>
-                • 🏥 올케어: 6만원 / 10만원 / 20만원 (월)<br>
+                • 🏥 올케어: 1만원~20만원 (월)<br>
                 • 🆕 최초가입비: 10만원 (1회)<br>
                 • 🔐 사물함: 2만원/월<br>
-                • 🏷️ 할인: 10% / 20%<br><br>
-                <strong>📅 계산 규칙</strong><br>
-                • 12월: 등원일 기준 일할계산<br>
-                • 1월~: 월정액
+                • 🏷️ 할인: 10% / 20%
             </div>`;
             
             container.innerHTML = html;
@@ -2391,9 +2483,8 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
                 let extras = [];
                 if (item.ticketType) extras.push(item.ticketType);
                 if (item.discount) extras.push(`${item.discount}%할인`);
-                if (item.allcare) {
-                    const allcareLabels = ['', '올케어6만', '올케어10만', '올케어20만'];
-                    extras.push(allcareLabels[item.allcare]);
+                if (item.allcare && item.allcare > 0) {
+                    extras.push(`올케어${(item.allcare/10000).toFixed(0)}만`);
                 }
                 if (item.mentoring) extras.push('멘토링'); // 기존 데이터 호환
                 if (item.locker) extras.push('사물함');
@@ -2437,8 +2528,7 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
                 const d = new Date(item.createdAt);
                 const endDate = item.endDate ? new Date(item.endDate) : null;
                 const endStr = endDate ? `${endDate.getFullYear()}-${endDate.getMonth()+1}-${endDate.getDate()}` : '';
-                const allcareLabels = ['없음', '6만원', '10만원', '20만원'];
-                const allcareStr = item.allcare ? allcareLabels[item.allcare] : (item.mentoring ? '멘토링' : '없음');
+                const allcareStr = item.allcare && item.allcare > 0 ? `${(item.allcare/10000).toFixed(0)}만원` : (item.mentoring ? '멘토링' : '없음');
                 csv += `${item.name},${item.floor}층,${item.seatType},${item.seatNumber},${item.period},${item.startDay || 1}일,${item.ticketType || '종일권'},${item.amount},${item.discount||0}%,${item.locker?'O':'X'},${allcareStr},${item.register?'O':'X'},${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()},${endStr}\n`;
             });
             const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
