@@ -1226,11 +1226,13 @@
                         </div>
                         <p style="font-size: 0.75rem; color: var(--gray-500); margin-bottom: 12px;">* 방학: 종일권 / 학기중: 오후권 (N수생 제외)</p>
                         
-                        <!-- 방과후멘토링 포함 -->
-                        <div class="option-item" id="mentoring-option" onclick="toggleOption('mentoring')">
-                            <input type="checkbox" id="opt-mentoring" onchange="calculatePrice()">
-                            <span class="option-label">📝 방과후멘토링</span>
-                            <span class="option-value" id="mentoring-price">+10만원</span>
+                        <!-- 올케어 선택 -->
+                        <div class="options-title" style="margin-top: 4px;">🏥 올케어 선택</div>
+                        <div class="discount-btn-group" style="flex-wrap: wrap;">
+                            <button class="discount-btn allcare-btn active" data-allcare="0" onclick="selectAllcare(0)">없음</button>
+                            <button class="discount-btn allcare-btn" data-allcare="1" onclick="selectAllcare(1)">6만원</button>
+                            <button class="discount-btn allcare-btn" data-allcare="2" onclick="selectAllcare(2)">10만원</button>
+                            <button class="discount-btn allcare-btn" data-allcare="3" onclick="selectAllcare(3)">20만원</button>
                         </div>
 
                         <!-- 사물함 -->
@@ -1472,8 +1474,13 @@
             }
         };
 
-        // 방과후멘토링 비용 (수정됨)
-        const MENTORING_FEE = 100000;  // 10만원 고정
+        // 올케어 비용 옵션
+        const ALLCARE_OPTIONS = {
+            0: 0,        // 없음
+            1: 60000,    // 6만원
+            2: 100000,   // 10만원
+            3: 200000    // 20만원
+        };
 
         // 8층 일할계산 요금표 (12월 기준, 사물함 제외)
         const dailyPriceTable_8F = {
@@ -1714,6 +1721,7 @@
         let selectedSeatFilter = '전체';
         let selectedDiscount = 0;
         let selectedTicketType = '종일권';
+        let selectedAllcare = 0;
         let deleteTarget = null;
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1946,11 +1954,14 @@
             document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('selected'));
             document.getElementById('start-day').value = '1';
             document.getElementById('opt-locker').checked = false;
-            document.getElementById('opt-mentoring').checked = false;
             document.getElementById('opt-register').checked = false;
             selectedTicketType = '종일권';
+            selectedAllcare = 0;
             document.querySelectorAll('.ticket-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.ticket === '종일권');
+            });
+            document.querySelectorAll('.allcare-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.allcare === '0');
             });
             selectDiscount(0);
             document.getElementById('total-price').textContent = '₩0';
@@ -2006,8 +2017,16 @@
 
         function selectDiscount(rate) {
             selectedDiscount = rate;
-            document.querySelectorAll('.discount-btn').forEach(btn => {
+            document.querySelectorAll('.discount-btn:not(.allcare-btn):not(.ticket-btn)').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.discount == rate);
+            });
+            calculatePrice();
+        }
+
+        function selectAllcare(level) {
+            selectedAllcare = level;
+            document.querySelectorAll('.allcare-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.allcare == level);
             });
             calculatePrice();
         }
@@ -2017,7 +2036,6 @@
             
             const startDay = parseInt(document.getElementById('start-day').value);
             const hasLocker = document.getElementById('opt-locker').checked;
-            const hasMentoring = document.getElementById('opt-mentoring').checked;
             const hasRegister = document.getElementById('opt-register').checked;
             const seatType = normalizeSeatType(selectedStudent.seatType);
             
@@ -2075,11 +2093,11 @@
             
             // 추가 옵션
             const lockerFee = hasLocker ? LOCKER_FEE * selectedPeriod : 0;
-            const mentoringFee = hasMentoring ? MENTORING_FEE * selectedPeriod : 0;
+            const allcareFee = ALLCARE_OPTIONS[selectedAllcare] * selectedPeriod;
             const registerFee = hasRegister ? REGISTER_FEE : 0;
             
             // 총액
-            const totalPrice = discountedSeatPrice + lockerFee + mentoringFee + registerFee;
+            const totalPrice = discountedSeatPrice + lockerFee + allcareFee + registerFee;
             
             document.getElementById('total-price').textContent = `₩${totalPrice.toLocaleString()}`;
             
@@ -2090,8 +2108,9 @@
                 breakdown += `<div class="price-breakdown-item discount"><span>🏷️ 할인 (${selectedDiscount}%)</span><span>-${discountAmount.toLocaleString()}원</span></div>`;
             }
             
-            if (hasMentoring) {
-                breakdown += `<div class="price-breakdown-item add"><span>📝 방과후멘토링 (${selectedPeriod}개월)</span><span>+${mentoringFee.toLocaleString()}원</span></div>`;
+            if (selectedAllcare > 0) {
+                const allcareLabels = ['', '6만원', '10만원', '20만원'];
+                breakdown += `<div class="price-breakdown-item add"><span>🏥 올케어 ${allcareLabels[selectedAllcare]} (${selectedPeriod}개월)</span><span>+${allcareFee.toLocaleString()}원</span></div>`;
             }
             
             if (hasLocker) {
@@ -2123,7 +2142,6 @@
             
             const startDay = parseInt(document.getElementById('start-day').value);
             const hasLocker = document.getElementById('opt-locker').checked;
-            const hasMentoring = document.getElementById('opt-mentoring').checked;
             const hasRegister = document.getElementById('opt-register').checked;
             const seatType = normalizeSeatType(selectedStudent.seatType);
             
@@ -2166,10 +2184,10 @@
             
             const discountedSeatPrice = totalSeatPrice - Math.round(totalSeatPrice * selectedDiscount / 100);
             const lockerFee = hasLocker ? LOCKER_FEE * selectedPeriod : 0;
-            const mentoringFee = hasMentoring ? MENTORING_FEE * selectedPeriod : 0;
+            const allcareFee = ALLCARE_OPTIONS[selectedAllcare] * selectedPeriod;
             const registerFee = hasRegister ? REGISTER_FEE : 0;
             
-            return discountedSeatPrice + lockerFee + mentoringFee + registerFee;
+            return discountedSeatPrice + lockerFee + allcareFee + registerFee;
         }
 
         function copyPrice() {
@@ -2188,7 +2206,6 @@
             
             const startDay = parseInt(document.getElementById('start-day').value);
             const hasLocker = document.getElementById('opt-locker').checked;
-            const hasMentoring = document.getElementById('opt-mentoring').checked;
             const hasRegister = document.getElementById('opt-register').checked;
             const totalPrice = getTotalPrice();
             const seatType = normalizeSeatType(selectedStudent.seatType);
@@ -2204,8 +2221,10 @@
             if (selectedDiscount > 0) {
                 details += `\n• 할인: ${selectedDiscount}%`;
             }
-            if (hasMentoring) {
-                details += `\n• 방과후멘토링: +${(MENTORING_FEE * selectedPeriod).toLocaleString()}원`;
+            if (selectedAllcare > 0) {
+                const allcareLabels = ['', '6만원', '10만원', '20만원'];
+                const allcareFee = ALLCARE_OPTIONS[selectedAllcare] * selectedPeriod;
+                details += `\n• 올케어 ${allcareLabels[selectedAllcare]}: +${allcareFee.toLocaleString()}원`;
             }
             if (hasLocker) {
                 details += `\n• 사물함: +${(LOCKER_FEE * selectedPeriod).toLocaleString()}원`;
@@ -2247,7 +2266,6 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
             if (!selectedStudent || !selectedPeriod) return;
             const totalPrice = getTotalPrice();
             const hasLocker = document.getElementById('opt-locker').checked;
-            const hasMentoring = document.getElementById('opt-mentoring').checked;
             const hasRegister = document.getElementById('opt-register').checked;
             const startDay = parseInt(document.getElementById('start-day').value);
             const today = new Date();
@@ -2268,7 +2286,7 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
                 amount: totalPrice,
                 discount: selectedDiscount,
                 locker: hasLocker,
-                mentoring: hasMentoring,
+                allcare: selectedAllcare,
                 register: hasRegister,
                 startDate: startDate.toISOString(),
                 endDate: endDate.toISOString(),
@@ -2301,7 +2319,7 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
             
             <div style="padding: 12px; background: var(--gray-50); border-radius: 8px; font-size: 0.8125rem; color: var(--gray-600);">
                 <strong>➕ 추가 옵션</strong><br>
-                • 📝 방과후멘토링: 10만원/월<br>
+                • 🏥 올케어: 6만원 / 10만원 / 20만원 (월)<br>
                 • 🆕 최초가입비: 10만원 (1회)<br>
                 • 🔐 사물함: 2만원/월<br>
                 • 🏷️ 할인: 10% / 20%<br><br>
@@ -2373,7 +2391,11 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
                 let extras = [];
                 if (item.ticketType) extras.push(item.ticketType);
                 if (item.discount) extras.push(`${item.discount}%할인`);
-                if (item.mentoring) extras.push('멘토링');
+                if (item.allcare) {
+                    const allcareLabels = ['', '올케어6만', '올케어10만', '올케어20만'];
+                    extras.push(allcareLabels[item.allcare]);
+                }
+                if (item.mentoring) extras.push('멘토링'); // 기존 데이터 호환
                 if (item.locker) extras.push('사물함');
                 if (item.register) extras.push('가입비');
                 const extrasText = extras.length ? ` (${extras.join(', ')})` : '';
@@ -2410,12 +2432,14 @@ ${fmt(startDate)} ~ ${fmt(endDate)}
 
         function exportHistory() {
             if (!paymentHistory.length) { showToast('내보낼 내역이 없습니다', 'error'); return; }
-            let csv = '이름,층,좌석유형,좌석번호,기간(개월),등원일,이용권,금액,할인율,사물함,멘토링,가입비,결제일,만료일\n';
+            let csv = '이름,층,좌석유형,좌석번호,기간(개월),등원일,이용권,금액,할인율,사물함,올케어,가입비,결제일,만료일\n';
             paymentHistory.forEach(item => {
                 const d = new Date(item.createdAt);
                 const endDate = item.endDate ? new Date(item.endDate) : null;
                 const endStr = endDate ? `${endDate.getFullYear()}-${endDate.getMonth()+1}-${endDate.getDate()}` : '';
-                csv += `${item.name},${item.floor}층,${item.seatType},${item.seatNumber},${item.period},${item.startDay || 1}일,${item.ticketType || '종일권'},${item.amount},${item.discount||0}%,${item.locker?'O':'X'},${item.mentoring?'O':'X'},${item.register?'O':'X'},${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()},${endStr}\n`;
+                const allcareLabels = ['없음', '6만원', '10만원', '20만원'];
+                const allcareStr = item.allcare ? allcareLabels[item.allcare] : (item.mentoring ? '멘토링' : '없음');
+                csv += `${item.name},${item.floor}층,${item.seatType},${item.seatNumber},${item.period},${item.startDay || 1}일,${item.ticketType || '종일권'},${item.amount},${item.discount||0}%,${item.locker?'O':'X'},${allcareStr},${item.register?'O':'X'},${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()},${endStr}\n`;
             });
             const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
