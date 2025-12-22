@@ -2128,7 +2128,7 @@
         }
 
         function loadData() {
-            const saved = localStorage.getItem('kimomma_students_v3');
+            const saved = localStorage.getItem('kimomma_students_v4');
             if (saved) students = JSON.parse(saved);
             const hist = localStorage.getItem('kimomma_history');
             if (hist) paymentHistory = JSON.parse(hist);
@@ -2137,7 +2137,7 @@
         }
 
         function saveData() {
-            localStorage.setItem('kimomma_students_v3', JSON.stringify(students));
+            localStorage.setItem('kimomma_students_v4', JSON.stringify(students));
             localStorage.setItem('kimomma_history', JSON.stringify(paymentHistory));
             localStorage.setItem('kimomma_recent', JSON.stringify(recentStudents));
         }
