@@ -2215,21 +2215,32 @@
                     paymentBadge = '<span class="student-payment-badge paid">현금</span>';
                 } else if (paymentStatus.includes('완납')) {
                     paymentBadge = '<span class="student-payment-badge" style="background:#dbeafe;color:#2563eb;">완납</span>';
+                } else if (!paymentStatus || paymentStatus === '') {
+                    paymentBadge = '<span class="student-payment-badge" style="background:#f3f4f6;color:#9ca3af;">없음</span>';
                 }
                 
                 if (s.sheetPaymentAmount && Number(s.sheetPaymentAmount) > 0) {
                     sheetAmountText = `<div class="student-sheet-amount">💰 ${Number(s.sheetPaymentAmount).toLocaleString()}원</div>`;
+                } else {
+                    sheetAmountText = `<div class="student-sheet-amount" style="color:#9ca3af;">💰 없음</div>`;
+                }
+                
+                // 비고 표시
+                let memoText = '';
+                if (s.sheetMemo && s.sheetMemo.trim() !== '') {
+                    memoText = `<div class="student-sheet-amount" style="color:#6366f1;">📝 ${s.sheetMemo}</div>`;
                 }
                 
                 return `
                 <div class="student-item ${selectedStudent?.name === s.name ? 'selected' : ''}" onclick="selectStudent(${s._index})">
                     <div class="student-info">
                         <span class="student-name">${s.name}${paymentBadge}</span>
-                        <span class="student-detail">${s.seatNumber}번 좌석</span>
+                        <span class="student-detail">${s.seatNumber ? s.seatNumber + '번 좌석' : '좌석 미정'}</span>
                         ${sheetAmountText}
+                        ${memoText}
                     </div>
                     <div style="display:flex;align-items:center;">
-                        <span class="seat-badge ${displayType}">${displayType}</span>
+                        <span class="seat-badge ${displayType}">${displayType || '미정'}</span>
                         <div class="student-actions" onclick="event.stopPropagation()">
                             <button class="student-action-btn edit" onclick="openEditModal(${s._index})">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2256,29 +2267,31 @@
             
             // 스프레드시트 금액 및 결제방식 정보
             let sheetInfo = '';
-            if (selectedStudent.sheetPaymentAmount || selectedStudent.sheetPaymentStatus) {
-                const paymentStatus = (selectedStudent.sheetPaymentStatus || '').toString();
-                let statusIcon = '';
-                if (paymentStatus.includes('미납')) statusIcon = '⚠️ 미납';
-                else if (paymentStatus.includes('카드')) statusIcon = '💳 카드';
-                else if (paymentStatus.includes('현금')) statusIcon = '💵 현금';
-                else if (paymentStatus.includes('완납')) statusIcon = '✅ 완납';
-                else if (paymentStatus.includes('퇴원')) statusIcon = '🚪 퇴원';
-                else statusIcon = paymentStatus || '-';
-                
-                const amountText = selectedStudent.sheetPaymentAmount ? 
-                    `${Number(selectedStudent.sheetPaymentAmount).toLocaleString()}원` : '-';
-                
-                sheetInfo = `<div style="margin-top:8px;padding:8px;background:var(--gray-50);border-radius:6px;font-size:0.8125rem;">
-                    <div>📊 스프레드시트: ${amountText} (${statusIcon})</div>
-                </div>`;
-            }
+            const paymentStatus = (selectedStudent.sheetPaymentStatus || '').toString();
+            const paymentAmount = selectedStudent.sheetPaymentAmount;
+            const memo = selectedStudent.sheetMemo || '';
+            
+            let statusIcon = '';
+            if (paymentStatus.includes('미납')) statusIcon = '⚠️ 미납';
+            else if (paymentStatus.includes('카드')) statusIcon = '💳 카드';
+            else if (paymentStatus.includes('현금')) statusIcon = '💵 현금';
+            else if (paymentStatus.includes('완납')) statusIcon = '✅ 완납';
+            else if (paymentStatus.includes('퇴원')) statusIcon = '🚪 퇴원';
+            else statusIcon = '없음';
+            
+            const amountText = paymentAmount && Number(paymentAmount) > 0 ? 
+                `${Number(paymentAmount).toLocaleString()}원` : '없음';
+            
+            sheetInfo = `<div style="margin-top:8px;padding:8px;background:var(--gray-50);border-radius:6px;font-size:0.8125rem;">
+                <div>📊 스프레드시트: ${amountText} (${statusIcon})</div>
+                ${memo ? `<div style="margin-top:4px;color:#6366f1;">📝 ${memo}</div>` : ''}
+            </div>`;
             
             document.getElementById('calculation-card').style.display = 'block';
             document.getElementById('selected-student-info').innerHTML = `
                 <div class="name">${selectedStudent.name} (${currentFloor}층)</div>
                 <div class="details">
-                    <div>📍 ${selectedStudent.seatType} ${selectedStudent.seatNumber}번</div>
+                    <div>📍 ${selectedStudent.seatType || '미정'} ${selectedStudent.seatNumber ? selectedStudent.seatNumber + '번' : '좌석 미정'}</div>
                     <div>📱 ${selectedStudent.parentPhone || '미등록'}</div>
                 </div>
                 ${sheetInfo}
