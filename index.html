@@ -99,6 +99,216 @@
             margin-bottom: 4px;
         }
 
+        /* 미납자 현황 스타일 */
+        .payment-status-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+        }
+        
+        .payment-status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .payment-status-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--gray-800);
+        }
+        
+        .sync-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.8125rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .sync-btn:hover {
+            background: var(--primary-dark);
+        }
+        
+        .sync-btn:disabled {
+            background: var(--gray-300);
+            cursor: not-allowed;
+        }
+        
+        .sync-btn.syncing {
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .payment-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .summary-box {
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .summary-box.paid {
+            background: var(--success-light);
+            border: 1px solid var(--success);
+        }
+        
+        .summary-box.unpaid {
+            background: var(--danger-light);
+            border: 1px solid var(--danger);
+        }
+        
+        .summary-box .count {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .summary-box.paid .count { color: var(--success); }
+        .summary-box.unpaid .count { color: var(--danger); }
+        
+        .summary-box .label {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+        }
+        
+        .unpaid-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+        }
+        
+        .unpaid-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .unpaid-item:hover {
+            background: var(--gray-50);
+        }
+        
+        .unpaid-item:last-child {
+            border-bottom: none;
+        }
+        
+        .unpaid-item .name {
+            font-weight: 500;
+        }
+        
+        .unpaid-item .info {
+            color: var(--gray-500);
+            font-size: 0.75rem;
+        }
+        
+        .unpaid-item .amount {
+            color: var(--danger);
+            font-weight: 600;
+        }
+        
+        .unpaid-item .copy-msg-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.6875rem;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+        
+        .unpaid-item .copy-msg-btn:hover {
+            background: var(--primary-dark);
+        }
+        
+        .unpaid-all-btn {
+            width: 100%;
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .unpaid-all-btn:hover {
+            background: #dc2626;
+        }
+        
+        .sync-settings {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        .sync-url-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--gray-300);
+            border-radius: 6px;
+            font-size: 0.8125rem;
+            margin-top: 8px;
+        }
+        
+        .sync-status {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: 8px;
+        }
+        
+        .student-payment-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.6875rem;
+            font-weight: 500;
+            margin-left: 6px;
+        }
+        
+        .student-payment-badge.paid {
+            background: var(--success-light);
+            color: var(--success);
+        }
+        
+        .student-payment-badge.unpaid {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+        
+        .student-sheet-amount {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
         .header .version {
             font-size: 0.875rem;
             color: var(--gray-500);
@@ -1091,6 +1301,40 @@
             </div>
         </div>
 
+        <!-- 미납자 현황 카드 -->
+        <div class="payment-status-card" id="payment-status-card">
+            <div class="payment-status-header">
+                <span class="payment-status-title">💰 결제 현황 (<span id="current-floor-status">8층</span>)</span>
+                <button class="sync-btn" id="sync-btn" onclick="syncWithSheet()">
+                    🔄 동기화
+                </button>
+            </div>
+            
+            <div class="payment-summary">
+                <div class="summary-box paid">
+                    <div class="count" id="paid-count">-</div>
+                    <div class="label">수납 완료</div>
+                </div>
+                <div class="summary-box unpaid">
+                    <div class="count" id="unpaid-count">-</div>
+                    <div class="label">미납</div>
+                </div>
+            </div>
+            
+            <div id="unpaid-section" style="display: none;">
+                <div style="font-size: 0.8125rem; font-weight: 600; margin-bottom: 8px; color: var(--danger);">⚠️ 미납자 목록</div>
+                <div class="unpaid-list" id="unpaid-list"></div>
+            </div>
+            
+            <div class="sync-settings">
+                <details>
+                    <summary style="cursor: pointer; font-size: 0.8125rem; color: var(--gray-600);">⚙️ 동기화 설정</summary>
+                    <input type="text" class="sync-url-input" id="sync-url" placeholder="Google Apps Script URL 입력" onchange="saveSyncUrl()">
+                    <div class="sync-status" id="sync-status">동기화되지 않음</div>
+                </details>
+            </div>
+        </div>
+
         <div class="nav-tabs">
             <button class="nav-tab active" onclick="switchSection('calculator')">💰 계산기</button>
             <button class="nav-tab" onclick="switchSection('stats')">📊 통계</button>
@@ -1762,9 +2006,15 @@
         let selectedAllcare = 0;
         let selectedCalcType = 'daily'; // 'daily' or 'monthly'
         let deleteTarget = null;
+        
+        // 스프레드시트 동기화 데이터
+        let sheetData = { floor8: [], floor7: [] };
+        let syncUrl = '';
+        let lastSyncTime = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             loadData();
+            loadSyncSettings();
             updateCounts();
             renderSeatFilter();
             renderStudentList();
@@ -1774,6 +2024,7 @@
             renderHistory();
             updateModalSeatTypes();
             checkExpiringPayments();
+            updatePaymentStatus();
             
             const savedTheme = localStorage.getItem('kimomma_theme');
             if (savedTheme === 'dark') {
@@ -1948,11 +2199,34 @@
             
             container.innerHTML = filtered.map(s => {
                 const displayType = normalizeSeatType(s.seatType);
+                
+                // 결제 상태 확인 (결제방식 열 기준)
+                let paymentBadge = '';
+                let sheetAmountText = '';
+                const paymentStatus = (s.sheetPaymentStatus || '').toString().toLowerCase();
+                
+                if (paymentStatus.includes('미납')) {
+                    paymentBadge = '<span class="student-payment-badge unpaid">미납</span>';
+                } else if (paymentStatus.includes('퇴원')) {
+                    paymentBadge = '<span class="student-payment-badge" style="background:#f3f4f6;color:#6b7280;">퇴원</span>';
+                } else if (paymentStatus.includes('카드')) {
+                    paymentBadge = '<span class="student-payment-badge paid">카드</span>';
+                } else if (paymentStatus.includes('현금')) {
+                    paymentBadge = '<span class="student-payment-badge paid">현금</span>';
+                } else if (paymentStatus.includes('완납')) {
+                    paymentBadge = '<span class="student-payment-badge" style="background:#dbeafe;color:#2563eb;">완납</span>';
+                }
+                
+                if (s.sheetPaymentAmount && Number(s.sheetPaymentAmount) > 0) {
+                    sheetAmountText = `<div class="student-sheet-amount">💰 ${Number(s.sheetPaymentAmount).toLocaleString()}원</div>`;
+                }
+                
                 return `
                 <div class="student-item ${selectedStudent?.name === s.name ? 'selected' : ''}" onclick="selectStudent(${s._index})">
                     <div class="student-info">
-                        <span class="student-name">${s.name}</span>
+                        <span class="student-name">${s.name}${paymentBadge}</span>
                         <span class="student-detail">${s.seatNumber}번 좌석</span>
+                        ${sheetAmountText}
                     </div>
                     <div style="display:flex;align-items:center;">
                         <span class="seat-badge ${displayType}">${displayType}</span>
@@ -1980,6 +2254,26 @@
             selectedDiscount = 0;
             addToRecent(selectedStudent.name, currentFloor);
             
+            // 스프레드시트 금액 및 결제방식 정보
+            let sheetInfo = '';
+            if (selectedStudent.sheetPaymentAmount || selectedStudent.sheetPaymentStatus) {
+                const paymentStatus = (selectedStudent.sheetPaymentStatus || '').toString();
+                let statusIcon = '';
+                if (paymentStatus.includes('미납')) statusIcon = '⚠️ 미납';
+                else if (paymentStatus.includes('카드')) statusIcon = '💳 카드';
+                else if (paymentStatus.includes('현금')) statusIcon = '💵 현금';
+                else if (paymentStatus.includes('완납')) statusIcon = '✅ 완납';
+                else if (paymentStatus.includes('퇴원')) statusIcon = '🚪 퇴원';
+                else statusIcon = paymentStatus || '-';
+                
+                const amountText = selectedStudent.sheetPaymentAmount ? 
+                    `${Number(selectedStudent.sheetPaymentAmount).toLocaleString()}원` : '-';
+                
+                sheetInfo = `<div style="margin-top:8px;padding:8px;background:var(--gray-50);border-radius:6px;font-size:0.8125rem;">
+                    <div>📊 스프레드시트: ${amountText} (${statusIcon})</div>
+                </div>`;
+            }
+            
             document.getElementById('calculation-card').style.display = 'block';
             document.getElementById('selected-student-info').innerHTML = `
                 <div class="name">${selectedStudent.name} (${currentFloor}층)</div>
@@ -1987,6 +2281,7 @@
                     <div>📍 ${selectedStudent.seatType} ${selectedStudent.seatNumber}번</div>
                     <div>📱 ${selectedStudent.parentPhone || '미등록'}</div>
                 </div>
+                ${sheetInfo}
             `;
             
             // 초기화
@@ -2722,6 +3017,269 @@ ${priceInfo}${optionsText}
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 2500);
         }
+
+        // ============================================
+        // 구글 스프레드시트 동기화 기능
+        // ============================================
+        
+        function loadSyncSettings() {
+            syncUrl = localStorage.getItem('kimomma_sync_url') || '';
+            const savedSheetData = localStorage.getItem('kimomma_sheet_data');
+            const savedSyncTime = localStorage.getItem('kimomma_last_sync');
+            
+            if (savedSheetData) {
+                try {
+                    sheetData = JSON.parse(savedSheetData);
+                } catch (e) {
+                    sheetData = { floor8: [], floor7: [] };
+                }
+            }
+            
+            if (savedSyncTime) {
+                lastSyncTime = new Date(savedSyncTime);
+            }
+            
+            document.getElementById('sync-url').value = syncUrl;
+            updateSyncStatus();
+        }
+        
+        function saveSyncUrl() {
+            syncUrl = document.getElementById('sync-url').value.trim();
+            localStorage.setItem('kimomma_sync_url', syncUrl);
+            showToast('동기화 URL이 저장되었습니다', 'success');
+        }
+        
+        function updateSyncStatus() {
+            const statusEl = document.getElementById('sync-status');
+            if (lastSyncTime) {
+                const timeStr = lastSyncTime.toLocaleString('ko-KR');
+                statusEl.textContent = `마지막 동기화: ${timeStr}`;
+            } else {
+                statusEl.textContent = '동기화되지 않음';
+            }
+        }
+        
+        async function syncWithSheet() {
+            if (!syncUrl) {
+                showToast('동기화 URL을 먼저 설정해주세요', 'error');
+                document.querySelector('.sync-settings details').open = true;
+                return;
+            }
+            
+            const btn = document.getElementById('sync-btn');
+            btn.disabled = true;
+            btn.classList.add('syncing');
+            btn.innerHTML = '⏳ 동기화 중...';
+            
+            try {
+                const response = await fetch(syncUrl);
+                const data = await response.json();
+                
+                if (data.success) {
+                    sheetData = {
+                        floor8: data.floor8 || [],
+                        floor7: data.floor7 || []
+                    };
+                    
+                    // 학생 목록 업데이트
+                    updateStudentsFromSheet();
+                    
+                    // 저장
+                    localStorage.setItem('kimomma_sheet_data', JSON.stringify(sheetData));
+                    lastSyncTime = new Date();
+                    localStorage.setItem('kimomma_last_sync', lastSyncTime.toISOString());
+                    
+                    updateSyncStatus();
+                    updatePaymentStatus();
+                    renderStudentList();
+                    updateCounts();
+                    
+                    showToast(`동기화 완료! 8층: ${sheetData.floor8.length}명, 7층: ${sheetData.floor7.length}명`, 'success');
+                } else {
+                    throw new Error(data.error || '동기화 실패');
+                }
+            } catch (error) {
+                console.error('Sync error:', error);
+                showToast('동기화 실패: ' + error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('syncing');
+                btn.innerHTML = '🔄 동기화';
+            }
+        }
+        
+        function updateStudentsFromSheet() {
+            // 8층 학생 업데이트
+            if (sheetData.floor8.length > 0) {
+                students[8] = sheetData.floor8.map((s, idx) => ({
+                    name: s.name,
+                    seatType: normalizeSeatType(s.seatType),
+                    seatNumber: s.seatNumber || '',
+                    phone: s.phone || '',
+                    parentPhone: s.parentPhone || '',
+                    school: s.school || '',
+                    // 스프레드시트 추가 정보
+                    sheetPaymentAmount: s.paymentAmount || '',
+                    sheetActualPayment: s.actualPayment || '',
+                    sheetPaymentStatus: s.paymentStatus || '', // 결제방식 (미납/카드/현금/완납/퇴원)
+                    sheetMemo: s.memo || ''
+                }));
+            }
+            
+            // 7층 학생 업데이트
+            if (sheetData.floor7.length > 0) {
+                students[7] = sheetData.floor7.map((s, idx) => ({
+                    name: s.name,
+                    seatType: normalizeSeatType(s.seatType),
+                    seatNumber: s.seatNumber || '',
+                    phone: s.phone || '',
+                    parentPhone: s.parentPhone || '',
+                    school: s.school || '',
+                    // 스프레드시트 추가 정보
+                    sheetPaymentAmount: s.paymentAmount || '',
+                    sheetActualPayment: s.actualPayment || '',
+                    sheetPaymentStatus: s.paymentStatus || '', // 결제방식 (미납/카드/현금/완납/퇴원)
+                    sheetMemo: s.memo || ''
+                }));
+            }
+            
+            saveData();
+        }
+        
+        function updatePaymentStatus() {
+            const studentList = students[currentFloor] || [];
+            
+            let paidCount = 0;
+            let unpaidCount = 0;
+            let unpaidStudents = [];
+            let retiredCount = 0;
+            
+            studentList.forEach((s, idx) => {
+                const paymentStatus = (s.sheetPaymentStatus || '').toString().toLowerCase();
+                
+                if (paymentStatus.includes('미납')) {
+                    unpaidCount++;
+                    unpaidStudents.push({
+                        index: idx,
+                        name: s.name,
+                        seatType: s.seatType,
+                        seatNumber: s.seatNumber,
+                        amount: s.sheetPaymentAmount || '',
+                        phone: s.phone || '',
+                        parentPhone: s.parentPhone || '',
+                        school: s.school || '',
+                        status: '미납'
+                    });
+                } else if (paymentStatus.includes('퇴원')) {
+                    retiredCount++;
+                } else if (paymentStatus.includes('카드') || paymentStatus.includes('현금') || paymentStatus.includes('완납')) {
+                    paidCount++;
+                }
+            });
+            
+            // 현황 업데이트
+            document.getElementById('current-floor-status').textContent = `${currentFloor}층`;
+            document.getElementById('paid-count').textContent = paidCount;
+            document.getElementById('unpaid-count').textContent = unpaidCount;
+            
+            // 미납자 목록
+            const unpaidSection = document.getElementById('unpaid-section');
+            const unpaidList = document.getElementById('unpaid-list');
+            
+            if (unpaidStudents.length > 0) {
+                unpaidSection.style.display = 'block';
+                
+                // 전역 변수에 미납자 저장 (메시지 복사용)
+                window.currentUnpaidStudents = unpaidStudents;
+                
+                unpaidList.innerHTML = unpaidStudents.map((s, i) => `
+                    <div class="unpaid-item" onclick="selectStudent(${s.index})">
+                        <div>
+                            <span class="name">${s.name}</span>
+                            <span class="info">${s.seatType} ${s.seatNumber}번 ${s.school ? '/ ' + s.school : ''}</span>
+                            <span class="info" style="display:block;">${s.parentPhone || s.phone || '연락처 없음'}</span>
+                        </div>
+                        <div style="display:flex;align-items:center;">
+                            <span class="amount">${s.amount ? Number(s.amount).toLocaleString() + '원' : '-'}</span>
+                            <button class="copy-msg-btn" onclick="event.stopPropagation(); copyUnpaidMessage(${i})">📋 메시지</button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // 전체 미납자 메시지 복사 버튼
+                unpaidList.innerHTML += `
+                    <button class="unpaid-all-btn" onclick="copyAllUnpaidMessage()">
+                        📢 전체 미납자 명단 복사 (${unpaidStudents.length}명)
+                    </button>
+                `;
+            } else {
+                unpaidSection.style.display = 'none';
+                unpaidList.innerHTML = '';
+                window.currentUnpaidStudents = [];
+            }
+        }
+        
+        // 개별 미납자 메시지 복사
+        function copyUnpaidMessage(index) {
+            const s = window.currentUnpaidStudents[index];
+            if (!s) return;
+            
+            const amountText = s.amount ? Number(s.amount).toLocaleString() + '원' : '(금액 확인 필요)';
+            
+            const message = `안녕하세요:)
+김엄마 관리형독서실 송도점 입니다.
+
+${s.name} 학생 이용료 결제 안내드립니다.
+
+■ 결제 정보
+• 층: ${currentFloor}층
+• 좌석: ${s.seatType} ${s.seatNumber}번
+• 결제금액: ${amountText}
+
+■ 등록방법
+
+1.온라인결제 - 납부하러 가기 클릭
+
+2.계좌이체 469901 04 155186
+[국민은행 수리딩 교육]
+[현금영수증 발급번호 메세지주세요.]
+
+3.현장결제 - 직접방문
+
+감사합니다 🙏`;
+            
+            navigator.clipboard.writeText(message);
+            showToast(`${s.name} 학생 결제 안내 메시지가 복사되었습니다`, 'success');
+        }
+        
+        // 전체 미납자 명단 복사
+        function copyAllUnpaidMessage() {
+            const unpaidList = window.currentUnpaidStudents || [];
+            if (unpaidList.length === 0) return;
+            
+            const today = new Date();
+            const dateStr = `${today.getFullYear()}년 ${today.getMonth()+1}월 ${today.getDate()}일`;
+            
+            let message = `📋 ${currentFloor}층 미납자 현황 (${dateStr})\n`;
+            message += `총 ${unpaidList.length}명\n\n`;
+            
+            unpaidList.forEach((s, i) => {
+                const amountText = s.amount ? Number(s.amount).toLocaleString() + '원' : '-';
+                message += `${i+1}. ${s.name} (${s.seatType} ${s.seatNumber}번)\n`;
+                message += `   💰 ${amountText}\n`;
+                message += `   📱 ${s.parentPhone || s.phone || '연락처 없음'}\n\n`;
+            });
+            
+            navigator.clipboard.writeText(message);
+            showToast(`${unpaidList.length}명 미납자 명단이 복사되었습니다`, 'success');
+        }
+        
+        // 층 변경 시 결제 현황 업데이트
+        const originalSelectFloor = selectFloor;
+        selectFloor = function(floor) {
+            originalSelectFloor(floor);
+            updatePaymentStatus();
+        };
     </script>
 </body>
 </html>
