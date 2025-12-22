@@ -1326,6 +1326,11 @@
                 <div class="unpaid-list" id="unpaid-list"></div>
             </div>
             
+            <div id="upcoming-section" style="display: none; margin-top: 12px;">
+                <div style="font-size: 0.8125rem; font-weight: 600; margin-bottom: 8px; color: var(--primary);">⏰ 결제 예정 (3일 이내)</div>
+                <div class="unpaid-list" id="upcoming-list"></div>
+            </div>
+            
             <div class="sync-settings">
                 <details>
                     <summary style="cursor: pointer; font-size: 0.8125rem; color: var(--gray-600);">⚙️ 동기화 설정</summary>
@@ -3135,6 +3140,7 @@ ${priceInfo}${optionsText}
                     sheetPaymentAmount: s.paymentAmount || '',
                     sheetActualPayment: s.actualPayment || '',
                     sheetPaymentStatus: s.paymentStatus || '', // 결제방식 (미납/카드/현금/완납/퇴원)
+                    sheetNextPaymentDate: s.nextPaymentDate || '', // 다음결제일
                     sheetMemo: s.memo || ''
                 }));
             }
@@ -3152,6 +3158,7 @@ ${priceInfo}${optionsText}
                     sheetPaymentAmount: s.paymentAmount || '',
                     sheetActualPayment: s.actualPayment || '',
                     sheetPaymentStatus: s.paymentStatus || '', // 결제방식 (미납/카드/현금/완납/퇴원)
+                    sheetNextPaymentDate: s.nextPaymentDate || '', // 다음결제일
                     sheetMemo: s.memo || ''
                 }));
             }
@@ -3230,6 +3237,100 @@ ${priceInfo}${optionsText}
                 unpaidList.innerHTML = '';
                 window.currentUnpaidStudents = [];
             }
+            
+            // 결제 예정 (3일 이내) + 날짜 지난 학생 표시
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const threeDaysLater = new Date(today);
+            threeDaysLater.setDate(threeDaysLater.getDate() + 3);
+            
+            let upcomingStudents = [];
+            
+            studentList.forEach((s, idx) => {
+                const paymentStatus = (s.sheetPaymentStatus || '').toString().toLowerCase();
+                // 미납자나 퇴원자는 제외
+                if (paymentStatus.includes('미납') || paymentStatus.includes('퇴원')) return;
+                
+                // 다음결제일 파싱
+                let nextPaymentDate = s.sheetNextPaymentDate || s.nextPaymentDate || '';
+                if (!nextPaymentDate) return;
+                
+                // 날짜 파싱 (여러 형식 지원)
+                let paymentDate = null;
+                const dateStr = nextPaymentDate.toString().trim();
+                
+                // 형식: 2025-01-15, 2025/01/15
+                if (dateStr.match(/^\d{4}[-/]\d{1,2}[-/]\d{1,2}/)) {
+                    paymentDate = new Date(dateStr.replace(/\//g, '-'));
+                }
+                // 형식: 1, 15 (일자만 있는 경우 - 현재 월 기준)
+                else if (dateStr.match(/^\d{1,2}$/)) {
+                    const day = parseInt(dateStr);
+                    paymentDate = new Date(today.getFullYear(), today.getMonth(), day);
+                }
+                
+                if (!paymentDate || isNaN(paymentDate.getTime())) return;
+                
+                // 날짜 지났거나 3일 이내인 학생
+                const isOverdue = paymentDate < today;
+                if (isOverdue || paymentDate <= threeDaysLater) {
+                    upcomingStudents.push({
+                        index: idx,
+                        name: s.name,
+                        seatType: s.seatType,
+                        seatNumber: s.seatNumber,
+                        amount: s.sheetPaymentAmount || '',
+                        phone: s.phone || '',
+                        parentPhone: s.parentPhone || '',
+                        school: s.school || '',
+                        paymentDate: paymentDate,
+                        paymentDateStr: `${paymentDate.getMonth()+1}월 ${paymentDate.getDate()}일`,
+                        isOverdue: isOverdue
+                    });
+                }
+            });
+            
+            // 날짜순 정렬 (지난 날짜 먼저)
+            upcomingStudents.sort((a, b) => a.paymentDate - b.paymentDate);
+            
+            const upcomingSection = document.getElementById('upcoming-section');
+            const upcomingList = document.getElementById('upcoming-list');
+            
+            if (upcomingStudents.length > 0) {
+                upcomingSection.style.display = 'block';
+                window.currentUpcomingStudents = upcomingStudents;
+                
+                const overdueCount = upcomingStudents.filter(s => s.isOverdue).length;
+                const upcomingCount = upcomingStudents.length - overdueCount;
+                
+                // 섹션 제목 업데이트
+                document.querySelector('#upcoming-section > div:first-child').innerHTML = 
+                    `⏰ 결제 예정 ${overdueCount > 0 ? `<span style="color:var(--danger);">(지남 ${overdueCount}명)</span>` : ''} ${upcomingCount > 0 ? `(3일내 ${upcomingCount}명)` : ''}`;
+                
+                upcomingList.innerHTML = upcomingStudents.map((s, i) => `
+                    <div class="unpaid-item" onclick="selectStudent(${s.index})" style="border-left: 3px solid ${s.isOverdue ? 'var(--danger)' : 'var(--primary)'}; ${s.isOverdue ? 'background: var(--danger-light);' : ''}">
+                        <div>
+                            <span class="name">${s.name}</span>
+                            <span class="info">${s.seatType} ${s.seatNumber}번 ${s.school ? '/ ' + s.school : ''}</span>
+                            <span class="info" style="display:block; ${s.isOverdue ? 'color:var(--danger);font-weight:600;' : ''}">📅 ${s.paymentDateStr}${s.isOverdue ? ' (지남!)' : ''} | ${s.parentPhone || s.phone || '연락처 없음'}</span>
+                        </div>
+                        <div style="display:flex;align-items:center;">
+                            <span class="amount" style="color:${s.isOverdue ? 'var(--danger)' : 'var(--primary)'};">${s.amount ? Number(s.amount).toLocaleString() + '원' : '-'}</span>
+                            <button class="copy-msg-btn" onclick="event.stopPropagation(); copyUpcomingMessage(${i})">📋 메시지</button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                upcomingList.innerHTML += `
+                    <button class="unpaid-all-btn" style="background:var(--primary);" onclick="copyAllUpcomingMessage()">
+                        📢 전체 결제 예정 명단 복사 (${upcomingStudents.length}명)
+                    </button>
+                `;
+            } else {
+                upcomingSection.style.display = 'none';
+                upcomingList.innerHTML = '';
+                window.currentUpcomingStudents = [];
+            }
         }
         
         // 개별 미납자 메시지 복사
@@ -3285,6 +3386,72 @@ ${s.name} 학생 이용료 결제 안내드립니다.
             
             navigator.clipboard.writeText(message);
             showToast(`${unpaidList.length}명 미납자 명단이 복사되었습니다`, 'success');
+        }
+        
+        // 개별 결제 예정자 메시지 복사
+        function copyUpcomingMessage(index) {
+            const s = window.currentUpcomingStudents[index];
+            if (!s) return;
+            
+            const amountText = s.amount ? Number(s.amount).toLocaleString() + '원' : '(금액 확인 필요)';
+            const overdueText = s.isOverdue ? ' (결제일이 지났습니다)' : '';
+            
+            const message = `안녕하세요:)
+김엄마 관리형독서실 송도점 입니다.
+
+${s.name} 학생 이용료 결제 안내드립니다.
+
+■ 결제 예정일: ${s.paymentDateStr}${overdueText}
+
+■ 결제 정보
+• 층: ${currentFloor}층
+• 좌석: ${s.seatType} ${s.seatNumber}번
+• 결제금액: ${amountText}
+
+■ 등록방법
+
+1.온라인결제 - 납부하러 가기 클릭
+
+2.계좌이체 469901 04 155186
+[국민은행 수리딩 교육]
+[현금영수증 발급번호 메세지주세요.]
+
+3.현장결제 - 직접방문
+
+감사합니다 🙏`;
+            
+            navigator.clipboard.writeText(message);
+            showToast(`${s.name} 학생 결제 안내 메시지가 복사되었습니다`, 'success');
+        }
+        
+        // 전체 결제 예정자 명단 복사
+        function copyAllUpcomingMessage() {
+            const upcomingList = window.currentUpcomingStudents || [];
+            if (upcomingList.length === 0) return;
+            
+            const today = new Date();
+            const dateStr = `${today.getFullYear()}년 ${today.getMonth()+1}월 ${today.getDate()}일`;
+            
+            const overdueCount = upcomingList.filter(s => s.isOverdue).length;
+            
+            let message = `⏰ ${currentFloor}층 결제 예정 (${dateStr} 기준)\n`;
+            message += `총 ${upcomingList.length}명`;
+            if (overdueCount > 0) {
+                message += ` (지남 ${overdueCount}명 🚨)`;
+            }
+            message += `\n\n`;
+            
+            upcomingList.forEach((s, i) => {
+                const amountText = s.amount ? Number(s.amount).toLocaleString() + '원' : '-';
+                const overdueText = s.isOverdue ? ' 🚨지남!' : '';
+                message += `${i+1}. ${s.name} (${s.seatType} ${s.seatNumber}번)\n`;
+                message += `   📅 ${s.paymentDateStr}${overdueText}\n`;
+                message += `   💰 ${amountText}\n`;
+                message += `   📱 ${s.parentPhone || s.phone || '연락처 없음'}\n\n`;
+            });
+            
+            navigator.clipboard.writeText(message);
+            showToast(`${upcomingList.length}명 결제 예정 명단이 복사되었습니다`, 'success');
         }
         
         // 층 변경 시 결제 현황 업데이트
