@@ -3137,6 +3137,7 @@ ${priceInfo}${optionsText}
                     parentPhone: s.parentPhone || '',
                     school: s.school || '',
                     // 스프레드시트 추가 정보
+                    sheetPaymentDay: s.paymentDay || '', // 결제일 (매월)
                     sheetPaymentAmount: s.paymentAmount || '',
                     sheetActualPayment: s.actualPayment || '',
                     sheetPaymentStatus: s.paymentStatus || '', // 결제방식 (미납/카드/현금/완납/퇴원)
@@ -3155,6 +3156,7 @@ ${priceInfo}${optionsText}
                     parentPhone: s.parentPhone || '',
                     school: s.school || '',
                     // 스프레드시트 추가 정보
+                    sheetPaymentDay: s.paymentDay || '', // 결제일 (매월)
                     sheetPaymentAmount: s.paymentAmount || '',
                     sheetActualPayment: s.actualPayment || '',
                     sheetPaymentStatus: s.paymentStatus || '', // 결제방식 (미납/카드/현금/완납/퇴원)
@@ -3251,25 +3253,21 @@ ${priceInfo}${optionsText}
                 // 미납자나 퇴원자는 제외
                 if (paymentStatus.includes('미납') || paymentStatus.includes('퇴원')) return;
                 
-                // 다음결제일 파싱
-                let nextPaymentDate = s.sheetNextPaymentDate || s.nextPaymentDate || '';
-                if (!nextPaymentDate) return;
+                // 결제일 파싱 (H열 - 매월 결제일 숫자)
+                let paymentDay = s.sheetPaymentDay || '';
+                if (!paymentDay) return;
                 
-                // 날짜 파싱 (여러 형식 지원)
-                let paymentDate = null;
-                const dateStr = nextPaymentDate.toString().trim();
+                const dayNum = parseInt(paymentDay.toString().trim());
+                if (isNaN(dayNum) || dayNum < 1 || dayNum > 31) return;
                 
-                // 형식: 2025-01-15, 2025/01/15
-                if (dateStr.match(/^\d{4}[-/]\d{1,2}[-/]\d{1,2}/)) {
-                    paymentDate = new Date(dateStr.replace(/\//g, '-'));
+                // 이번 달 결제일 계산
+                let paymentDate = new Date(today.getFullYear(), today.getMonth(), dayNum);
+                
+                // 이미 많이 지났으면 (7일 이상) 다음 달로 간주
+                const daysDiff = Math.floor((today - paymentDate) / (1000 * 60 * 60 * 24));
+                if (daysDiff > 7) {
+                    paymentDate = new Date(today.getFullYear(), today.getMonth() + 1, dayNum);
                 }
-                // 형식: 1, 15 (일자만 있는 경우 - 현재 월 기준)
-                else if (dateStr.match(/^\d{1,2}$/)) {
-                    const day = parseInt(dateStr);
-                    paymentDate = new Date(today.getFullYear(), today.getMonth(), day);
-                }
-                
-                if (!paymentDate || isNaN(paymentDate.getTime())) return;
                 
                 // 날짜 지났거나 3일 이내인 학생
                 const isOverdue = paymentDate < today;
