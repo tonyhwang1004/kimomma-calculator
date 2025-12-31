@@ -2118,25 +2118,32 @@
         let lastSyncTime = null;
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadData();
-            loadSyncSettings();
-            updateCounts();
-            renderSeatFilter();
-            renderStudentList();
-            renderPriceTable();
-            renderRecentStudents();
-            updateStats();
-            renderHistory();
-            updateModalSeatTypes();
-            checkExpiringPayments();
-            updatePaymentStatus();
-            
-            const savedTheme = localStorage.getItem('kimomma_theme');
-            if (savedTheme === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                updateThemeIcon();
-            }
-        });
+    loadData();
+    loadSyncSettings();
+    updateCounts();
+    renderSeatFilter();
+    renderStudentList();
+    renderPriceTable();
+    renderRecentStudents();
+    updateStats();
+    renderHistory();
+    updateModalSeatTypes();
+    checkExpiringPayments();
+    updatePaymentStatus();
+    
+    const savedTheme = localStorage.getItem('kimomma_theme');
+    if (savedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        updateThemeIcon();
+    }
+    
+    // ⭐ 페이지 열 때 자동 동기화 추가
+    if (syncUrl) {
+        setTimeout(() => {
+            syncWithSheet();
+        }, 500);
+    }
+});
 
         // 결제 임박 학생 체크 함수 (paymentDay 기반)
         function checkExpiringPayments() {
