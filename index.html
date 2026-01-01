@@ -284,9 +284,9 @@
             </div>
 
             <div class="auto-month-selector">
-                <button class="auto-month-btn active" data-month="1" onclick="selectAutoMonth(1)">1월</button>
-                <button class="auto-month-btn" data-month="2" onclick="selectAutoMonth(2)">2월</button>
-                <button class="auto-month-btn" data-month="3" onclick="selectAutoMonth(3)">3월</button>
+                <button class="auto-month-btn active" data-month="0" onclick="selectAutoMonth(0)">1월</button>
+                <button class="auto-month-btn" data-month="1" onclick="selectAutoMonth(1)">2월</button>
+                <button class="auto-month-btn" data-month="2" onclick="selectAutoMonth(2)">3월</button>
             </div>
 
             <div class="auto-message-card" id="auto-message-card" style="display:none;">
@@ -470,16 +470,15 @@
         
         function initAutoMonth(){
             const today=new Date();
-            const nextMonth=today.getMonth()+2;
-            autoMonth=nextMonth>12?nextMonth-12:nextMonth;
-            document.querySelectorAll('.auto-month-btn').forEach(b=>{
-                const m=parseInt(b.dataset.month);
-                const displayMonth=today.getMonth()+m+1;
-                b.textContent=`${displayMonth>12?displayMonth-12:displayMonth}월`;
-                b.dataset.month=m;
-                b.classList.toggle('active',m===1);
+            const currentMonth=today.getMonth(); // 0=1월, 1=2월...
+            document.querySelectorAll('.auto-month-btn').forEach((b,idx)=>{
+                const targetMonth=currentMonth+idx; // 현재월, 다음월, 다다음월
+                const displayMonth=(targetMonth%12)+1; // 1~12월 표시
+                b.textContent=`${displayMonth}월`;
+                b.dataset.month=idx;
+                b.classList.toggle('active',idx===0);
             });
-            autoMonth=1;
+            autoMonth=0; // 첫번째 버튼 = 현재월
         }
 
         function initSelects(){
@@ -581,8 +580,8 @@
         }
         
         function selectAutoMonth(m){
-            autoMonth=m;
-            document.querySelectorAll('.auto-month-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.month)===m));
+            autoMonth=m; // 0=현재월, 1=다음월, 2=다다음월
+            document.querySelectorAll('.auto-month-btn').forEach((b,idx)=>b.classList.toggle('active',idx===m));
             if(autoSelectedStudent)generateAutoMessage(autoSelectedStudent);
         }
         
@@ -624,7 +623,7 @@
             const monthlyPrice=dailyRate*30;
             const monthNames=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
             const today=new Date();
-            const targetMonth=(today.getMonth()+autoMonth)%12;
+            const targetMonth=(today.getMonth()+autoMonth)%12; // autoMonth: 0=현재월, 1=다음월, 2=다다음월
             const targetYear=today.getMonth()+autoMonth>11?today.getFullYear()+1:today.getFullYear();
             const lastDay=new Date(targetYear,targetMonth+1,0).getDate();
             const startMonthName=monthNames[targetMonth];
