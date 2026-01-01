@@ -371,7 +371,7 @@
                 timestamp: new Date().toISOString()
             };
             console.log('제출 데이터:', formData);
-            const SCRIPT_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL';
+            const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5D0dVNjuAguXcF1IyPJghjC0cLxj2tDJ5p2rbyNYahdabOmQZPn1PvyIF8dcik4y4dw/exec';
             if (SCRIPT_URL !== 'YOUR_APPS_SCRIPT_WEB_APP_URL') {
                 fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) }).then(() => showSuccessModal()).catch(() => showSuccessModal());
             } else { showSuccessModal(); }
