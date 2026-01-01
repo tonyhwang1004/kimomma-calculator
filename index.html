@@ -218,6 +218,23 @@
         .toast.success{background:var(--success)}
         .toast.error{background:var(--danger)}
         .empty-state{text-align:center;padding:50px 20px;color:var(--gray-500)}
+        .auto-student-list{max-height:500px;overflow-y:auto}
+        .auto-student-item{padding:16px 18px;border-bottom:1px solid var(--gray-100);cursor:pointer;transition:all 0.15s}
+        .auto-student-item:hover{background:var(--gray-50)}
+        .auto-student-item.selected{background:linear-gradient(135deg,rgba(102,126,234,0.15),rgba(118,75,162,0.15));border-left:4px solid var(--primary)}
+        .auto-student-item .top-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+        .auto-student-item .name{font-weight:700;font-size:1.1rem}
+        .auto-student-item .amount{font-weight:800;font-size:1.1rem;color:var(--primary)}
+        .auto-student-item .details{font-size:0.85rem;color:var(--gray-500)}
+        .auto-message-card{background:linear-gradient(135deg,rgba(102,126,234,0.1),rgba(118,75,162,0.1));border:2px solid var(--primary);border-radius:var(--radius);padding:20px;margin-bottom:20px}
+        .auto-message-card h3{font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+        .auto-message-preview{background:white;border-radius:var(--radius-sm);padding:16px;font-size:0.9rem;line-height:1.8;white-space:pre-wrap;max-height:300px;overflow-y:auto;border:1px solid var(--gray-200)}
+        .auto-copy-btn{width:100%;padding:18px;background:linear-gradient(135deg,var(--success),#34d399);color:white;border:none;border-radius:var(--radius);font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:16px}
+        .auto-copy-btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+        .auto-copy-btn:disabled{opacity:0.5;cursor:not-allowed}
+        .auto-month-selector{display:flex;gap:8px;margin-bottom:16px}
+        .auto-month-btn{flex:1;padding:12px;border:2px solid var(--gray-200);border-radius:var(--radius-sm);background:white;font-size:0.95rem;font-weight:600;cursor:pointer}
+        .auto-month-btn.active{background:linear-gradient(135deg,var(--primary),var(--secondary));border-color:transparent;color:white}
         .empty-state .icon{font-size:3rem;margin-bottom:12px;opacity:0.5}
         .backup-info{margin-top:18px;padding:14px;background:var(--warning-light);border-radius:var(--radius-sm);font-size:0.9rem;color:#92400e}
         @media(max-width:600px){.summary-grid{grid-template-columns:repeat(2,1fr)}.header h1{font-size:1.25rem}.action-buttons{grid-template-columns:1fr}.price-amount{font-size:2.2rem}}
@@ -254,12 +271,39 @@
         </div>
 
         <div class="nav-tabs">
-            <button class="nav-tab active" onclick="switchSection('calculator')">💰 계산기</button>
+            <button class="nav-tab active" onclick="switchSection('auto')">⚡ 자동</button>
+            <button class="nav-tab" onclick="switchSection('calculator')">💰 수동</button>
             <button class="nav-tab" onclick="switchSection('stats')">📊 통계</button>
             <button class="nav-tab" onclick="switchSection('history')">📋 내역</button>
         </div>
 
-        <div class="section active" id="section-calculator">
+        <div class="section active" id="section-auto">
+            <div class="floor-tabs">
+                <button class="floor-tab floor-8 active" onclick="selectAutoFloor(8)"><span>8층</span><span class="count" id="auto-floor8-count">0명</span></button>
+                <button class="floor-tab floor-7" onclick="selectAutoFloor(7)"><span>7층</span><span class="count" id="auto-floor7-count">0명</span></button>
+            </div>
+
+            <div class="auto-month-selector">
+                <button class="auto-month-btn active" data-month="1" onclick="selectAutoMonth(1)">1월</button>
+                <button class="auto-month-btn" data-month="2" onclick="selectAutoMonth(2)">2월</button>
+                <button class="auto-month-btn" data-month="3" onclick="selectAutoMonth(3)">3월</button>
+            </div>
+
+            <div class="auto-message-card" id="auto-message-card" style="display:none;">
+                <h3>📋 결제 안내 메시지</h3>
+                <div class="auto-message-preview" id="auto-message-preview"></div>
+                <button class="auto-copy-btn" id="auto-copy-btn" onclick="copyAutoMessage()">📋 메시지 복사하기</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h2>👤 학생 선택</h2></div>
+                <div class="card-body" style="padding:0;">
+                    <div class="auto-student-list" id="auto-student-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="section-calculator">
             <div class="summary-grid">
                 <div class="summary-card total"><div class="icon">👥</div><div class="value" id="summary-total">0</div><div class="label">전체</div></div>
                 <div class="summary-card paid"><div class="icon">✅</div><div class="value" id="summary-paid">0</div><div class="label">수납완료</div></div>
@@ -418,11 +462,25 @@
         let students={8:[],7:[]},paymentHistory=[],recentStudents=[],currentFloor=8,selectedStudent=null,selectedPeriod=null,selectedSeatFilter='전체',selectedDiscount=0,selectedTicketType='종일권',selectedAllcare=0,selectedCalcType='daily',deleteTarget=null,syncUrl='',lastSyncTime=null;
 
         document.addEventListener('DOMContentLoaded',()=>{
-            loadData();loadSyncSettings();initSelects();updateCounts();renderSeatFilter();renderStudentList();renderPriceTable();renderRecentStudents();updateStats();renderHistory();updateModalSeatTypes();updateSummary();
+            loadData();loadSyncSettings();initSelects();initAutoMonth();updateCounts();renderSeatFilter();renderStudentList();renderPriceTable();renderRecentStudents();updateStats();renderHistory();updateModalSeatTypes();updateSummary();renderAutoStudentList();
             if(localStorage.getItem('kimomma_theme')==='dark')document.documentElement.setAttribute('data-theme','dark');
             if(syncUrl){document.getElementById('settings-panel').style.display='none';document.getElementById('sync-status-bar').style.display='flex';setTimeout(()=>syncWithSheet(),500);}
             else{document.getElementById('settings-panel').style.display='block';document.getElementById('sync-status-bar').style.display='none';}
         });
+        
+        function initAutoMonth(){
+            const today=new Date();
+            const nextMonth=today.getMonth()+2;
+            autoMonth=nextMonth>12?nextMonth-12:nextMonth;
+            document.querySelectorAll('.auto-month-btn').forEach(b=>{
+                const m=parseInt(b.dataset.month);
+                const displayMonth=today.getMonth()+m+1;
+                b.textContent=`${displayMonth>12?displayMonth-12:displayMonth}월`;
+                b.dataset.month=m;
+                b.classList.toggle('active',m===1);
+            });
+            autoMonth=1;
+        }
 
         function initSelects(){
             let startDayEl=document.getElementById('start-day');
@@ -462,7 +520,7 @@
                     if(data.floor8?.length)students[8]=data.floor8.map(s=>({name:s.name||'',seatType:normalizeSeatType(s.seatType||''),seatNumber:s.seatNumber||'',phone:s.phone||'',parentPhone:s.parentPhone||'',paymentDay:s.paymentDay||'',paymentAmount:s.paymentAmount||'',paymentStatus:s.paymentStatus||'',memo:s.memo||'',lockerNumber:s.lockerNumber||''}));
                     if(data.floor7?.length)students[7]=data.floor7.map(s=>({name:s.name||'',seatType:normalizeSeatType(s.seatType||''),seatNumber:s.seatNumber||'',phone:s.phone||'',parentPhone:s.parentPhone||'',paymentDay:s.paymentDay||'',paymentAmount:s.paymentAmount||'',paymentStatus:s.paymentStatus||'',memo:s.memo||'',lockerNumber:s.lockerNumber||''}));
                     lastSyncTime=new Date();localStorage.setItem('kimomma_last_sync',lastSyncTime.toISOString());localStorage.setItem('kimomma_students_data',JSON.stringify(students));
-                    updateSyncStatusText();updateCounts();renderStudentList();updateSummary();updatePaymentLists();updateStats();
+                    updateSyncStatusText();updateCounts();renderStudentList();updateSummary();updatePaymentLists();updateStats();renderAutoStudentList();
                     showToast(`동기화 완료! 총 ${students[8].length+students[7].length}명`,'success');
                 }else throw new Error(data.error||'실패');
             }catch(e){console.error(e);showToast('동기화 실패: URL 확인','error');document.getElementById('settings-panel').style.display='block';}
@@ -508,8 +566,109 @@
             }else ps.style.display='none';
         }
 
-        function switchSection(s){document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.section').forEach(sec=>sec.classList.remove('active'));event.target.classList.add('active');document.getElementById(`section-${s}`).classList.add('active');if(s==='stats')updateStats();if(s==='history')renderHistory();}
-        function selectFloor(f){currentFloor=f;selectedStudent=null;selectedPeriod=null;selectedSeatFilter='전체';document.querySelectorAll('.floor-tab').forEach(t=>t.classList.remove('active'));document.querySelector(`.floor-tab.floor-${f}`).classList.add('active');document.getElementById('calculation-card').style.display='none';renderSeatFilter();renderStudentList();updateSummary();}
+        function switchSection(s){document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.section').forEach(sec=>sec.classList.remove('active'));event.target.classList.add('active');document.getElementById(`section-${s}`).classList.add('active');if(s==='stats')updateStats();if(s==='history')renderHistory();if(s==='auto')renderAutoStudentList();}
+        function selectFloor(f){currentFloor=f;selectedStudent=null;selectedPeriod=null;selectedSeatFilter='전체';document.querySelectorAll('#section-calculator .floor-tab').forEach(t=>t.classList.remove('active'));document.querySelector(`#section-calculator .floor-tab.floor-${f}`).classList.add('active');document.getElementById('calculation-card').style.display='none';renderSeatFilter();renderStudentList();updateSummary();}
+
+        // ===== 자동 결제 탭 기능 =====
+        let autoFloor=8,autoMonth=1,autoSelectedStudent=null;
+        
+        function selectAutoFloor(f){
+            autoFloor=f;autoSelectedStudent=null;
+            document.querySelectorAll('#section-auto .floor-tab').forEach(t=>t.classList.remove('active'));
+            document.querySelector(`#section-auto .floor-tab.floor-${f}`).classList.add('active');
+            document.getElementById('auto-message-card').style.display='none';
+            renderAutoStudentList();
+        }
+        
+        function selectAutoMonth(m){
+            autoMonth=m;
+            document.querySelectorAll('.auto-month-btn').forEach(b=>b.classList.toggle('active',parseInt(b.dataset.month)===m));
+            if(autoSelectedStudent)generateAutoMessage(autoSelectedStudent);
+        }
+        
+        function renderAutoStudentList(){
+            const container=document.getElementById('auto-student-list');
+            const list=students[autoFloor]||[];
+            document.getElementById('auto-floor8-count').textContent=`${students[8]?.length||0}명`;
+            document.getElementById('auto-floor7-count').textContent=`${students[7]?.length||0}명`;
+            if(!list.length){container.innerHTML='<div class="empty-state"><div class="icon">📋</div><p>동기화된 학생이 없습니다<br>먼저 동기화를 해주세요</p></div>';return;}
+            container.innerHTML=list.map((s,idx)=>{
+                const amt=s.paymentAmount?Number(s.paymentAmount).toLocaleString()+'원':'-';
+                const seatType=normalizeSeatType(s.seatType);
+                const locker=s.lockerNumber?`🔐 ${s.lockerNumber}`:'';
+                const status=s.paymentStatus||'';
+                let statusBadge='';
+                if(status.includes('미납'))statusBadge='<span class="badge urgency">미납</span>';
+                else if(status.includes('완납')||status.includes('카드')||status.includes('현금'))statusBadge='<span class="badge" style="background:var(--success-light);color:var(--success);">완납</span>';
+                return`<div class="auto-student-item ${autoSelectedStudent?.name===s.name?'selected':''}" onclick="selectAutoStudent(${idx})">
+                    <div class="top-row"><span class="name">${s.name} ${statusBadge}</span><span class="amount">${amt}</span></div>
+                    <div class="details">${autoFloor}층 ${seatType} ${s.seatNumber}번 ${locker}</div>
+                </div>`;
+            }).join('');
+        }
+        
+        function selectAutoStudent(idx){
+            autoSelectedStudent=students[autoFloor][idx];
+            autoSelectedStudent._floor=autoFloor;
+            autoSelectedStudent._index=idx;
+            renderAutoStudentList();
+            generateAutoMessage(autoSelectedStudent);
+            document.getElementById('auto-message-card').style.display='block';
+            document.getElementById('auto-message-card').scrollIntoView({behavior:'smooth',block:'center'});
+        }
+        
+        function generateAutoMessage(s){
+            const seatType=normalizeSeatType(s.seatType);
+            const ticketType=seatType==='프리미엄'?'종일권':'종일권';
+            const dailyRate=dailyRates['종일권'][seatType]||0;
+            const monthlyPrice=dailyRate*30;
+            const monthNames=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+            const today=new Date();
+            const targetMonth=(today.getMonth()+autoMonth)%12;
+            const targetYear=today.getMonth()+autoMonth>11?today.getFullYear()+1:today.getFullYear();
+            const lastDay=new Date(targetYear,targetMonth+1,0).getDate();
+            const startMonthName=monthNames[targetMonth];
+            const hasLocker=s.lockerNumber&&s.lockerNumber.toString().trim()!=='';
+            
+            let periodText=`${startMonthName}1일~ ${startMonthName}${lastDay}일 결제금액입니다.`;
+            let priceInfo=`1개월 ${monthlyPrice.toLocaleString()}원`;
+            let seatPrice=monthlyPrice;
+            let optionsText='';
+            
+            if(hasLocker){
+                optionsText+=`\n사물함 1개월 = ${LOCKER_FEE.toLocaleString()}원`;
+            }
+            
+            const total=seatPrice+(hasLocker?LOCKER_FEE:0);
+            
+            const msg=`안녕하세요:)
+김엄마 관리형독서실 송도점 입니다.
+
+■ 결제금액
+${s.name}학생은 ${autoFloor}층 ${seatType} ${ticketType}
+${periodText}
+${priceInfo}${optionsText}
+총 ${total.toLocaleString()}원
+
+■등록방법
+
+1.온라인결제 - 납부하러 가기 클릭
+
+2.계좌이체 469901 04 155186
+[국민은행 수리딩 교육]
+[현금영수증 발급번호 메세지주세요.]
+
+3.현장결제 -직접방문`;
+            
+            document.getElementById('auto-message-preview').textContent=msg;
+            window.autoMessageText=msg;
+        }
+        
+        function copyAutoMessage(){
+            if(!window.autoMessageText)return;
+            navigator.clipboard.writeText(window.autoMessageText);
+            showToast(`${autoSelectedStudent.name} 메시지 복사됨`,'success');
+        }
 
         function renderSeatFilter(){document.getElementById('seat-filter').innerHTML=seatTypes[currentFloor].map(t=>`<button class="seat-filter-btn ${selectedSeatFilter===t?'active':''}" onclick="filterBySeatType('${t}')">${t}</button>`).join('');}
         function filterBySeatType(t){selectedSeatFilter=t;renderSeatFilter();renderStudentList();}
